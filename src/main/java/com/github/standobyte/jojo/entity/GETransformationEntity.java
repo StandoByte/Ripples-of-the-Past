@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
+import com.github.standobyte.jojo.mrpresident.CocoJumboTurtleEntity;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -511,6 +512,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                         living.setItemSlot(EquipmentSlotType.MAINHAND, ItemStack.EMPTY);
                     }
                 }
+            }
+            if (entity instanceof CocoJumboTurtleEntity) { // kill me
+                ((CocoJumboTurtleEntity) entity).dropKey();
             }
             entity.remove();
         }

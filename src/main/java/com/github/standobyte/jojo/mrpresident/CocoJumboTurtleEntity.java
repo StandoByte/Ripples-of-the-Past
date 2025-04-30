@@ -258,6 +258,20 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
             return ActionConditionResult.POSITIVE;
         }
     }
+    
+    
+    @Override
+    protected void dropCustomDeathLoot(DamageSource pSource, int pLooting, boolean pRecentlyHit) {
+        super.dropCustomDeathLoot(pSource, pLooting, pRecentlyHit);
+        dropKey();
+    }
+    
+    public void dropKey() {
+        if (!level.isClientSide() && hasKey()) {
+            ItemStack key = new ItemStack(ModItems.MR_PRESIDENT_KEY.get());
+            spawnAtLocation(key);
+        }
+    }
 
     
     public boolean isCarried() {
