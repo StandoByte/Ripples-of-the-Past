@@ -25,6 +25,7 @@
     "TheMostUnnecessaryMixin",
     "AbstractBlockMixin",
     "BarrierBlockWallClimbMixin",
+    "ShearsItemMixin",
     "itemtracking.equip.LivingEntityMixin",
     "itemtracking.equip.MobEntityMixin",
     "itemtracking.equip.ArmorStandEntityMixin",
