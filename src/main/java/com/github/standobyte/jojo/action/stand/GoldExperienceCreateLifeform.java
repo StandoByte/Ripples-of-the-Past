@@ -39,6 +39,7 @@ import com.github.standobyte.jojo.item.MolotovItem;
 import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
+import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.mrpresident.MrPresidentStandType;
 import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentWorldData;
 import com.github.standobyte.jojo.network.NetworkUtil;
@@ -87,6 +88,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -603,10 +605,18 @@ public class GoldExperienceCreateLifeform extends StandAction {
         tf.getTfSourceData().withEntitySource(itemEntity);
     }
     
+    private static final ResourceLocation ENCH_TABLE_ID = new ResourceLocation("minecraft:enchanting_table");
     private void mobFromBlock(GETransformationEntity tf, BlockPos blockPos, BlockState blockState, ServerWorld world, Entity lifeformCreated, LivingEntity geUser) {
         TileEntity tileEntity = world.getBlockEntity(blockPos);
+        if (tileEntity != null) {
+            ResourceLocation teId = tileEntity.getType().getRegistryName();
+            if (ModInteractionUtil.isModLoaded("apotheosis") && ENCH_TABLE_ID.equals(teId)) {
+                tileEntity = null;
+            }
+        }
+        boolean keepItems = tileEntity instanceof IInventory;
         
-        if (tileEntity instanceof IInventory) {
+        if (keepItems) {
             KEEP_ITEMS.add(tileEntity);
             
             if (lifeformCreated.getType().getRegistryName().getPath().contains("pigeon")) {
@@ -627,7 +637,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
             }
         }
         world.removeBlock(blockPos, false);
-        KEEP_ITEMS.remove(tileEntity);
+        if (keepItems) {
+            KEEP_ITEMS.remove(tileEntity);
+        }
         
         tf.getTfSourceData().withBlockSource(blockState, blockPos, tileEntity);
     }
