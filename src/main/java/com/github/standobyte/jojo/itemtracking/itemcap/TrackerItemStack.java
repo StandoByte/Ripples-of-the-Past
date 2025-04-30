@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.capability.entity.MerchantDataProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -19,7 +20,11 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.JukeboxBlock;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemFrameEntity;
+import net.minecraft.entity.merchant.villager.VillagerEntity;
+import net.minecraft.entity.monster.piglin.PiglinEntity;
+import net.minecraft.entity.monster.piglin.PiglinTasks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -32,6 +37,7 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.village.GossipType;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
@@ -144,35 +150,16 @@ public class TrackerItemStack {
     
     public void onUpdate(ServerWorld world) {
         SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getItemsTracker().updateTracker(trackerUuid, this, world);
-        if (trackingPlayerId != null) {
-            PlayerEntity player = world.getPlayerByUUID(trackingPlayerId);
-            if (player instanceof ServerPlayerEntity) {
-                PacketManager.sendToClient(new TrackedItemPacket(
-                        trackerUuid, itemStack, positionEntity, Optional.ofNullable(positionBlock)), 
-                        (ServerPlayerEntity) player);
-            }
+        PlayerEntity player = getTrackingPlayer(world);
+        if (player instanceof ServerPlayerEntity) {
+            PacketManager.sendToClient(new TrackedItemPacket(
+                    trackerUuid, itemStack, positionEntity, Optional.ofNullable(positionBlock)), 
+                    (ServerPlayerEntity) player);
         }
     }
     
-    public void onShrink(ServerWorld world) {
-        if (positionBlock != null) {
-            TileEntity tileEntity = world.getBlockEntity(positionBlock);
-            if (tileEntity instanceof JukeboxTileEntity) {
-                JukeboxTileEntity jukebox = (JukeboxTileEntity) tileEntity;
-                BlockState blockState = world.getBlockState(positionBlock);
-                world.levelEvent(1010, positionBlock, 0);
-                jukebox.clearContent();
-                blockState = blockState.setValue(JukeboxBlock.HAS_RECORD, Boolean.valueOf(false));
-                world.setBlock(positionBlock, blockState, 2);
-            }
-        }
-        else if (positionEntity.isPresent()) {
-            Entity entity = getAtEntity(world);
-            if (entity instanceof ItemFrameEntity) {
-                ItemFrameEntity itemFrame = (ItemFrameEntity) entity;
-                itemFrame.setItem(ItemStack.EMPTY);
-            }
-        }
+    public PlayerEntity getTrackingPlayer(ServerWorld world) {
+        return trackingPlayerId != null ? world.getPlayerByUUID(trackingPlayerId) : null;
     }
     
     public void setAtEntity(int entityId, World world, KnownItemState itemState) {
@@ -409,5 +396,56 @@ public class TrackerItemStack {
      */
     public static boolean deserializesForgeCaps(CompoundNBT itemTag) {
         return itemTag != null && itemTag.contains("ReadCapOnSet") && itemTag.contains("ForgeCaps", Constants.NBT.TAG_COMPOUND);
+    }
+    
+
+    public void onShrink(ServerWorld world) {
+        if (positionBlock != null) {
+            TileEntity tileEntity = world.getBlockEntity(positionBlock);
+            if (tileEntity instanceof JukeboxTileEntity) {
+                JukeboxTileEntity jukebox = (JukeboxTileEntity) tileEntity;
+                BlockState blockState = world.getBlockState(positionBlock);
+                world.levelEvent(1010, positionBlock, 0);
+                jukebox.clearContent();
+                blockState = blockState.setValue(JukeboxBlock.HAS_RECORD, Boolean.valueOf(false));
+                world.setBlock(positionBlock, blockState, 2);
+            }
+        }
+        else if (positionEntity.isPresent()) {
+            Entity entity = getAtEntity(world);
+            if (entity instanceof ItemFrameEntity) {
+                ItemFrameEntity itemFrame = (ItemFrameEntity) entity;
+                itemFrame.setItem(ItemStack.EMPTY);
+            }
+            else if (entity instanceof VillagerEntity) {
+                PlayerEntity thiefPlayer = getTrackingPlayer(world);
+                if (thiefPlayer != null) {
+                    ((VillagerEntity) entity).getGossips().add(thiefPlayer.getUUID(), GossipType.MAJOR_NEGATIVE, 25);
+                    world.broadcastEntityEvent(entity, MCUtil.EntityEvents.VILLAGER_ANGRY);
+                    entity.getCapability(MerchantDataProvider.CAPABILITY).ifPresent(merchantData -> {
+                        merchantData.setRefuseTrading(thiefPlayer.getUUID(), true);
+                    });
+                }
+            }
+            else if (entity instanceof PiglinEntity && itemStack.getItem() == PiglinTasks.BARTERING_ITEM) {
+                PlayerEntity thiefPlayer = getTrackingPlayer(world);
+                if (thiefPlayer != null) {
+                    PiglinTasksAccess.onPiglinScammed((PiglinEntity) entity, thiefPlayer);
+                }
+            }
+        }
+    }
+    
+    private static class PiglinTasksAccess extends PiglinTasks {
+        
+        protected static void onPiglinScammed(PiglinEntity piglin, LivingEntity player) {
+            PiglinTasks.wasHurtBy(piglin, player);
+            /*
+             * TODO piglin scam counter
+             *     if > 0, when receiving a gold ingot, they don't give an item back and instead decrement the counter
+             *         if after the decrement scam counter == 0, stop attacking
+             */
+//            incrementScamCounter(piglin);
+        }
     }
 }

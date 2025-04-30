@@ -36,6 +36,7 @@
     "itemtracking.inventory.JukeboxTileEntityMixin",
     "itemtracking.ItemStackMixin",
     "itemtracking.ContainerSlotMixin",
+    "itemtracking.MerchantResultSlotMixin",
     "itemtracking.projectile.ProjectileItemEntityMixin",
     "itemtracking.projectile.FireworkRocketEntityMixin",
     "itemtracking.projectile.BowItemMixin",

@@ -557,8 +557,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
         if (holder instanceof ItemFrameEntity) {
             tf.moveTo(tf.position().add(holder.getLookAngle().scale(0.5)));
         }
-        mobFromInventory(tf, itemTracker.getItem(), world, wouldBeThrower, fishBucketPos, mobName);
         itemTracker.onShrink((ServerWorld) world);
+        itemTracker.clear();
+        mobFromInventory(tf, itemTracker.getItem(), world, wouldBeThrower, fishBucketPos, mobName);
     }
     
     private void mobFromInventory(GETransformationEntity tf, ItemStack item, World world, 

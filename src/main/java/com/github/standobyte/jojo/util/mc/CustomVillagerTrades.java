@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
 import net.minecraft.entity.merchant.villager.VillagerData;
@@ -45,8 +46,10 @@ import net.minecraft.inventory.MerchantInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.MerchantOffer;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -64,10 +67,28 @@ public class CustomVillagerTrades {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onVillagerInteract(PlayerInteractEvent.EntityInteract event) {
         Entity target = event.getTarget();
-        if (target instanceof VillagerEntity && !target.level.isClientSide()) {
+        if (!target.level.isClientSide() && target instanceof LivingEntity) {
+            LivingEntity targetLiving = (LivingEntity) target;
             target.getCapability(MerchantDataProvider.CAPABILITY).ifPresent(merchantData -> {
-                if (!merchantData.gaveUniqueTrade()
-                        && giveTradeManually((VillagerEntity) target, event.getPlayer(), merchantData)) {
+                VillagerEntity asVillager = target instanceof VillagerEntity ? (VillagerEntity) target : null;
+                PlayerEntity player = event.getPlayer();
+                
+                if (merchantData.refusesTradingWith(player)) {
+                    if (asVillager != null) {
+                        asVillager.setUnhappyCounter(40);
+                    }
+                    // why the fuck are LivingEntity#getSoundVolume() and LivingEntity#getVoicePitch() not public exactly?
+                    float soundVolume = 1;
+                    Random random = targetLiving.getRandom();
+                    float voicePitch = targetLiving.isBaby() ? (random.nextFloat() - random.nextFloat()) * 0.2F + 1.5F : (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F;
+                    asVillager.playSound(SoundEvents.VILLAGER_NO, soundVolume, voicePitch);
+                    event.setCanceled(true);
+                    event.setCancellationResult(ActionResultType.CONSUME);
+                    return;
+                }
+                
+                if (asVillager != null && !merchantData.gaveUniqueTrade()
+                        && giveTradeManually(asVillager, player, merchantData)) {
                     merchantData.setGaveUniqueTrade();
                 }
             });

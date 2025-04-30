@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.capability.entity;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.UUID;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -11,7 +13,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.nbt.StringNBT;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -19,6 +23,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 public class MerchantData implements INBTSerializable<CompoundNBT> {
     private final LivingEntity entity;
     private final IMerchant asMerchant;
+    private final Collection<UUID> refuseTradingWith = new HashSet<>();
     
     private final Multimap<UUID, String> playersTriedTrading = ArrayListMultimap.create();
     
@@ -50,6 +55,19 @@ public class MerchantData implements INBTSerializable<CompoundNBT> {
     public boolean resetPlayerTrade(PlayerEntity player, String tradeType) {
         return playersTriedTrading.remove(player.getUUID(), tradeType);
     }
+    
+    public void setRefuseTrading(UUID playerUUID, boolean refuse) {
+        if (refuse) {
+            refuseTradingWith.add(playerUUID);
+        }
+        else {
+            refuseTradingWith.remove(playerUUID);
+        }
+    }
+    
+    public boolean refusesTradingWith(PlayerEntity player) {
+        return refuseTradingWith.contains(player.getUUID());
+    }
 
     @Override
     public CompoundNBT serializeNBT() {
@@ -64,6 +82,14 @@ public class MerchantData implements INBTSerializable<CompoundNBT> {
             }
         });
         nbt.put("PlayerTries", playerTriesNbt);
+        
+        if (!refuseTradingWith.isEmpty()) {
+            ListNBT refuseTradingWithNbt = new ListNBT();
+            for (UUID id : this.refuseTradingWith) {
+                refuseTradingWithNbt.add(NBTUtil.createUUID(id));
+            }
+            nbt.put("RefuseTrade", refuseTradingWithNbt);
+        }
         
         return nbt;
     }
@@ -82,6 +108,19 @@ public class MerchantData implements INBTSerializable<CompoundNBT> {
                     JojoMod.getLogger().error(e);
                 }
             });
+        });
+        
+        refuseTradingWith.clear();
+        MCUtil.getNbtElement(nbt, "RefuseTrade", ListNBT.class).ifPresent(refuseTradingWithNbt -> {
+            for (INBT element : refuseTradingWithNbt) {
+                try {
+                    UUID id = NBTUtil.loadUUID(element);
+                    this.refuseTradingWith.add(id);
+                }
+                catch (IllegalArgumentException e) {
+                    break;
+                }
+            }
         });
     }
 }
