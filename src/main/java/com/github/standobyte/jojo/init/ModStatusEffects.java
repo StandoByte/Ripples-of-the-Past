@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonHealing;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.potion.FreezeEffect;
+import com.github.standobyte.jojo.potion.GELifeshotEffect;
 import com.github.standobyte.jojo.potion.HamonShockEffect;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.potion.HypnosisEffect;
@@ -97,7 +98,7 @@ public class ModStatusEffects {
             () -> new StatusEffect(EffectType.HARMFUL, 0x808080));
     
     public static final RegistryObject<Effect> SENSORY_OVERLOAD = EFFECTS.register("sensory_overload", 
-            () -> new StatusEffect(EffectType.HARMFUL, 0xD88F1F).setUncurable());
+            () -> new GELifeshotEffect(0xD88F1F).setUncurable());
     
 //    public static final RegistryObject<Effect> STAND_SEALING = EFFECTS.register("stand_sealing", 
 //            () -> new StatusEffect(EffectType.HARMFUL, 0xCACAD8)); // TODO Stand Sealing effect
