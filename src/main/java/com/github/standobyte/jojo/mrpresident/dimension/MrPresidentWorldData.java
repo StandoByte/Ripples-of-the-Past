@@ -202,6 +202,13 @@ public class MrPresidentWorldData implements INBTSerializable<CompoundNBT> {
             this.z = blockPos.getZ() >> 4;
         }
         
+        public boolean isPosInsideSection(BlockPos blockPos) {
+            return 
+                    this.x == blockPos.getX() >> 4 &&
+                    this.y == blockPos.getY() >> 4 &&
+                    this.z == blockPos.getZ() >> 4;
+        }
+        
         public static ChunkSectionPos fromNBT(ListNBT nbt) {
             if (nbt.size() == 3 && nbt.getElementType() == Constants.NBT.TAG_INT) {
                 int x = nbt.getInt(0);
@@ -211,6 +218,10 @@ public class MrPresidentWorldData implements INBTSerializable<CompoundNBT> {
             }
             
             return null;
+        }
+        
+        public BlockPos blockPosition(int xLLOffset, int yLLOffset, int zLLOffset) {
+            return new BlockPos((this.x << 4) + xLLOffset, (this.y << 4) + yLLOffset, (this.z << 4) + zLLOffset);
         }
         
         public BlockPos blockPosition(BlockPos llOffset) {
