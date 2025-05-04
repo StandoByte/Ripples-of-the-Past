@@ -476,7 +476,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void renderPost(RenderGameOverlayEvent.Post event) {
-        if (!noHudRender(mc)) {
+        if (noHudRender(mc)) {
             return;
         }
         
