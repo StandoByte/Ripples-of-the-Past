@@ -114,13 +114,15 @@ public class PillarmanDivineSandstormEntity extends ModdedProjectileEntity {
     @Override
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean blockDestroyed) {
         super.afterBlockHit(blockRayTraceResult, blockDestroyed);
-        Vector3d center = getBoundingBox().getCenter();
-        if (isAtmospheric()) {
-        	level.playSound(ClientUtil.getClientPlayer(), center.x, center.y, center.z, SoundEvents.WITHER_BREAK_BLOCK, 
-                    SoundCategory.AMBIENT, 0.3F, 1.0F);
-        } else {
-        	level.playSound(ClientUtil.getClientPlayer(), center.x, center.y, center.z, SoundEvents.GENERIC_EXPLODE, 
-                    SoundCategory.AMBIENT, 0.7F, 1.0F);
+        if (level.isClientSide()) {
+            Vector3d center = getBoundingBox().getCenter();
+            if (isAtmospheric()) {
+            	level.playSound(ClientUtil.getClientPlayer(), center.x, center.y, center.z, SoundEvents.WITHER_BREAK_BLOCK, 
+                        SoundCategory.AMBIENT, 0.3F, 1.0F);
+            } else {
+            	level.playSound(ClientUtil.getClientPlayer(), center.x, center.y, center.z, SoundEvents.GENERIC_EXPLODE, 
+                        SoundCategory.AMBIENT, 0.7F, 1.0F);
+            }
         }
         
     }

@@ -112,7 +112,7 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
                     if (level.isEmptyBlock(blockPos) && !isRetracting()) {
                         level.setBlockAndUpdate(blockPos, ModBlocks.BOILING_BLOOD.get().defaultBlockState().setValue(FlowingFluidBlock.LEVEL, 4));
                         Vector3d center = getBoundingBox().getCenter();
-                        level.playSound(ClientUtil.getClientPlayer(), center.x, center.y, center.z, SoundEvents.LAVA_EXTINGUISH, 
+                        level.playSound(null, center.x, center.y, center.z, SoundEvents.LAVA_EXTINGUISH, 
                                 SoundCategory.AMBIENT, 0.2F, 1.0F);
                     }
                 }
