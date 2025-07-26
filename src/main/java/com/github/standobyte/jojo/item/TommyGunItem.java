@@ -98,7 +98,7 @@ public class TommyGunItem extends Item {
                 if (entity.getType() == EntityType.PLAYER ? world.isClientSide() : !world.isClientSide()) {
                     float recoil = 1F + Math.min((1F - (float) remainingTicks / (float) getUseDuration(stack)) * 6F, 3F);
                     entity.yRot += (random.nextFloat() - 0.5F) * 0.3F * recoil;
-                    entity.xRot += -random.nextFloat() * 0.75F * recoil;
+                    entity.xRot = MathHelper.clamp(entity.xRot -random.nextFloat() * 0.75F * recoil, -90, 90);
                 }
                 if (!world.isClientSide()) {
                     stack.getOrCreateTag().putByte("GunshotTick", (byte) 3);
