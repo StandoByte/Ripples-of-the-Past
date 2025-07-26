@@ -1014,6 +1014,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         LivingEntity user = getUser();
         if (user != null && user.isAlive()) {
             user.knockback(strength, xRatio, zRatio);
+            user.hurtMarked = true;
         }
     }
 
