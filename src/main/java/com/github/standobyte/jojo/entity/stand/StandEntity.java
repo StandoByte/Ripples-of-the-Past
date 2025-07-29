@@ -13,11 +13,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.IHasStandPunch;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
+import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.action.stand.punch.IPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
@@ -702,6 +704,13 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
 
     public void setStandPose(StandPose pose) {
+        if (pose == TimeStop.ANIM) {
+            ticksSinceTS = 0;
+        }
+        else if (this.standPose == TimeStop.ANIM) {
+            ticksSinceTS = -1;
+        }
+        
         if (this.standPose != pose) {
             if (level.isClientSide()) {
                 this.setPoseTime = tickCount;
@@ -721,7 +730,29 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return summonPoseRandomByte;
     }
     
+    protected int ticksSinceTS = -1;
     public StandPoseData getCurPose(float partialTick) {
+        if (ticksSinceTS >= 0) {
+            return StandPoseData.start()
+                    .standPose(TimeStop.ANIM)
+                    .actionPhase(StandEntityAction.Phase.PERFORM)
+                    .animTime(ticksSinceTS + partialTick)
+                    .end();
+        }
+        LivingEntity user = getUser();
+        if (user != null) {
+            IStandPower userPower = getUserPower();
+            if (userPower != null) {
+                Action<IStandPower> heldAction = userPower.getHeldAction();
+                if (heldAction instanceof TimeStop) {
+                    float progress = (userPower.getHeldActionTicks() + partialTick) / heldAction.getHoldDurationMax(userPower);
+                    return StandPoseData.start().standPose(TimeStop.ANIM).actionPhase(StandEntityAction.Phase.WINDUP)
+                            .phaseCompletion(progress)
+                            .end();
+                }
+            }
+        }
+        
         StandPose pose = getStandPose();
         if (pose == StandPose.SUMMON && this.isArmsOnlyMode()) {
             setStandPose(StandPose.IDLE);
@@ -1293,7 +1324,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                 moveWithoutCollision(vecToUser);
             }
             
-            overlayTickCount++;
+            ++overlayTickCount;
+            if (ticksSinceTS >= 0) ++ticksSinceTS;
         }
         
         if (level.isClientSide() && offsetLerpTicks < offsetLerpMaxTicks) {
