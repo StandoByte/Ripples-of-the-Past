@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
@@ -56,13 +57,14 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
     private float points;
     
     private Direction.Axis axis;
-    private float radius;
+    public float radius;
+    public float sparksAngle = (float) Math.PI * 2;
     
     private int wavesToAdd;
     private int addedWaves = 0;
     private List<Wave> waves = new LinkedList<>();
     private int tickLifeSpan;
-    private float damage;
+    public float damage;
     public static final float KNOCKBACK_FACTOR = 0.0F;
 
     public HamonSendoOverdriveEntity(World world, LivingEntity user, Direction.Axis axis) {
@@ -172,7 +174,9 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
                 List<LivingEntity> targets = entity.level.getEntitiesOfClass(LivingEntity.class, 
                         entity.getHurtHitbox(tick), entity.filter.and(target -> !hitEntities.contains(target)));
                 for (LivingEntity target : targets) {
-                    if (target.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.tryHurtFromSendoOverdrive(entity, WAVE_ADD_TICK)).orElse(true)
+                    if (entity.checkHurtAngle(target)
+                            && target.getCapability(LivingUtilCapProvider.CAPABILITY).map(
+                                    cap -> cap.tryHurtFromSendoOverdrive(entity, WAVE_ADD_TICK)).orElse(true)
                             && DamageUtil.dealHamonDamage(target, entity.damage, entity, entity.getUser())) {
                         entity.givePointsToUser();
                     }
@@ -236,6 +240,18 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
         return cache;
     }
     
+    private boolean checkHurtAngle(Entity target) {
+        if (targetedFace != null && targetedFace.getAxis() == Direction.Axis.Y) {
+            Vector3d sendoCenter = new Vector3d(this.getX(), 0, this.getZ());
+            Vector3d entityPos = new Vector3d(target.getX(), 0, target.getZ());
+            Vector3d vecToEntity = entityPos.subtract(sendoCenter);
+            float angle = MathUtil.yRotDegFromVec(vecToEntity);
+            float diff = MathHelper.wrapDegrees(angle - this.yRot) * MathUtil.DEG_TO_RAD;
+            return diff >= -sparksAngle / 2 && diff <= sparksAngle / 2;
+        }
+        return true;
+    }
+    
     private AxisAlignedBB makeHurtHitBox(double radius) {
         Vector3d center = getBoundingBox().getCenter();
         AxisAlignedBB hitBox = new AxisAlignedBB(center, center);
@@ -285,8 +301,21 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
     
     private void spawnSparksCircle(Vector3d center, Direction.Axis axis, float radius) {
         if (level.isClientSide() && axis != null && radius > 0) {
+            double minAngle;
+            double maxAngle;
+            
+            if (axis == Direction.Axis.Y) {
+                double yRot = (this.yRot + 90) * MathUtil.DEG_TO_RAD;
+                minAngle = -sparksAngle / 2 + yRot;
+                maxAngle = sparksAngle / 2 + yRot;
+            }
+            else {
+                minAngle = -Math.PI;
+                maxAngle = Math.PI;
+            }
+            
             double step = 0.2 / radius;
-            for (double angle = 0; angle < 2 * Math.PI; angle += Math.PI * step) {
+            for (double angle = minAngle; angle < maxAngle; angle += Math.PI * step) {
                 Vector3d particleVec = null;
                 switch (axis) {
                 case X:
@@ -336,6 +365,7 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
         if (nbt.contains("Waves", MCUtil.getNbtId(ListNBT.class))) {
             this.waves = Wave.loadWavesFromNBT(nbt.getList("Waves", MCUtil.getNbtId(Wave.WAVE_NBT_CLASS)));
         }
+        this.sparksAngle = nbt.getFloat("SparksAngle");
         this.tickLifeSpan = nbt.getInt("LifeSpan");
         this.tickCount = nbt.getInt("Age");
         this.damage = nbt.getFloat("Damage");
@@ -360,6 +390,7 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
         nbt.putInt("WavesToAdd", wavesToAdd);
         nbt.putInt("WavesAdded", addedWaves);
         nbt.put("Waves", Wave.saveWavesToNBT(waves));
+        nbt.putFloat("SparksAngle", sparksAngle);
         nbt.putInt("LifeSpan", tickLifeSpan);
         nbt.putInt("Age", tickCount);
         nbt.putFloat("Damage", damage);
@@ -383,6 +414,7 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
         buffer.writeFloat(radius);
         buffer.writeVarInt(wavesToAdd);
         buffer.writeVarInt(addedWaves);
+        buffer.writeFloat(sparksAngle);
         buffer.writeVarInt(tickLifeSpan);
         buffer.writeVarInt(tickCount);
         
@@ -396,6 +428,7 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
         this.radius = additionalData.readFloat();
         this.wavesToAdd = additionalData.readVarInt();
         this.addedWaves = additionalData.readVarInt();
+        this.sparksAngle = additionalData.readFloat();
         this.tickLifeSpan = additionalData.readVarInt();
         this.tickCount = additionalData.readVarInt();
         absMoveTo(xo, yo, zo, yRot, xRot);

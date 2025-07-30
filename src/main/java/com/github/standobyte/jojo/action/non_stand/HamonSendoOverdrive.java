@@ -1,13 +1,9 @@
 package com.github.standobyte.jojo.action.non_stand;
 
-import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
-import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
@@ -15,8 +11,9 @@ import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
@@ -28,13 +25,13 @@ public class HamonSendoOverdrive extends HamonAction {
         super(builder);
     }
     
-    @Override
-    protected Action<INonStandPower> replaceAction(INonStandPower power, ActionTarget target) {
-        if (target.getEntity() instanceof LivingEntity && !getTargetRequirement().checkTargetType(target.getType())) {
-            return ModHamonActions.HAMON_OVERDRIVE.get().getVisibleAction(power, target);
-        }
-        return super.replaceAction(power, target);
-    }
+//    @Override
+//    protected Action<INonStandPower> replaceAction(INonStandPower power, ActionTarget target) {
+//        if (target.getEntity() instanceof LivingEntity && !getTargetRequirement().checkTargetType(target.getType())) {
+//            return ModHamonActions.HAMON_OVERDRIVE.get().getVisibleAction(power, target);
+//        }
+//        return super.replaceAction(power, target);
+//    }
     
     @Override
     public void overrideVanillaMouseTarget(ObjectWrapper<ActionTarget> targetContainer, World world, LivingEntity user, INonStandPower power) {
@@ -53,38 +50,35 @@ public class HamonSendoOverdrive extends HamonAction {
     }
     
     @Override
-    protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-        BlockPos blockPos = target.getBlockPos();
-        Direction face = target.getFace();
-        if (!user.level.getEntities(ModEntityTypes.SENDO_HAMON_OVERDRIVE.get(), new AxisAlignedBB(blockPos), 
-                entity -> blockPos.equals(entity.getTargetedBlockPos()) && face == entity.getTargetedFace()).isEmpty()) {
-            return ActionConditionResult.NEGATIVE;
+    public void stoppedHolding(World world, LivingEntity user, INonStandPower power, int ticksHeld, boolean willFire) {
+        ActionTarget target = power.getMouseTarget();
+        if (target.getType() == TargetType.BLOCK) {
+            if (!world.isClientSide()) {
+                BlockPos blockPos = target.getBlockPos();
+                Direction face = target.getFace();
+                
+                HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
+                float energyCost = getEnergyCost(power, target);
+                float hamonEfficiency = hamon.getActionEfficiency(energyCost, false, getUnlockingSkill());
+                
+                HamonSendoOverdriveEntity sendoOverdrive = new HamonSendoOverdriveEntity(world, 
+                        user, face.getAxis());
+                float heldRatio = MathHelper.clamp((float) (power.getHeldActionTicks() - 1) / this.getHoldDurationToFire(power), 0, 1);
+                sendoOverdrive.yRot = user.yRot;
+                sendoOverdrive.xRot = user.xRot;
+                sendoOverdrive.sparksAngle = (float) Math.PI / 4 + heldRatio * (float) Math.PI / 4 * 7;
+                sendoOverdrive.radius = (2 + hamon.getHamonControlLevelRatio() * 3) * hamonEfficiency;
+                sendoOverdrive.damage = 0.75F * hamonEfficiency;
+                sendoOverdrive.setWavesCount(2 + (int) ((2 + Math.min(hamon.getHamonControlLevelRatio() * 3, 2)) * hamonEfficiency));
+                sendoOverdrive.setStatPoints(Math.min(energyCost, power.getEnergy()) * hamonEfficiency);
+                        
+                sendoOverdrive.moveTo(Vector3d.atCenterOf(blockPos).subtract(0, sendoOverdrive.getDimensions(null).height * 0.5, 0));
+                sendoOverdrive.setBlockTarget(target.getBlockPos(), target.getFace());
+                world.addFreshEntity(sendoOverdrive);
+                
+                if (!willFire) power.consumeEnergy(energyCost);
+            }
+            user.swing(Hand.MAIN_HAND, false);
         }
-        return super.checkSpecificConditions(user, power, target);
-    }
-    
-    @Override
-    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-        if (!world.isClientSide()) {
-            HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-            float energyCost = getEnergyCost(power, target);
-            float hamonEfficiency = hamon.getActionEfficiency(energyCost, true, getUnlockingSkill());
-            
-            BlockPos blockPos = target.getBlockPos();
-            HamonSendoOverdriveEntity sendoOverdrive = new HamonSendoOverdriveEntity(world, 
-                    user, target.getFace().getAxis())
-                    .setRadius((2 + hamon.getHamonControlLevelRatio() * 3) * hamonEfficiency)
-                    .setWaveDamage(0.75F * hamonEfficiency)
-                    .setWavesCount(2 + (int) ((2 + Math.min(hamon.getHamonControlLevelRatio() * 3, 2)) * hamonEfficiency))
-                    .setStatPoints(Math.min(energyCost, power.getEnergy()) * hamonEfficiency);
-            sendoOverdrive.moveTo(Vector3d.atCenterOf(blockPos).subtract(0, sendoOverdrive.getDimensions(null).height * 0.5, 0));
-            sendoOverdrive.setBlockTarget(target.getBlockPos(), target.getFace());
-            world.addFreshEntity(sendoOverdrive);
-        }
-    }
-    
-    @Override
-    public TargetRequirement getTargetRequirement() {
-        return TargetRequirement.BLOCK;
     }
 }

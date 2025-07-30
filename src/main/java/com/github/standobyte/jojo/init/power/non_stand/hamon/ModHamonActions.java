@@ -53,7 +53,7 @@ public class ModHamonActions {
                     .needsFreeOffHand().shiftVariationOf(HAMON_OVERDRIVE)));
    
    public static final RegistryObject<HamonAction> HAMON_SENDO_OVERDRIVE = ACTIONS.register("hamon_sendo_overdrive", 
-           () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(900F)
+           () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(900F).holdToFire(30, true)
                    .needsFreeMainHand().swingHand()
                    .shout(ModHamonSkills.CHARACTER_JONATHAN, ModSounds.JONATHAN_SENDO_OVERDRIVE)));
 

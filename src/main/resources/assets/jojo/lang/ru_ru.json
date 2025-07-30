@@ -948,7 +948,7 @@
   "_hamonSkill.overdrive.desc": "The user's unarmed punches deal additional Hamon damage. Hamon is especially effective against undead creatures.",
   "_hamonSkill.overdrive_strong.desc": "Shift variation - Hamon Beat - is a stronger attack with extra knockback.",
   "hamonSkill.sendo_overdrive.name": "Овердрайв Сэндо",
-  "_hamonSkill.sendo_overdrive.desc": "Applying this attack to a wall or floor creates a wave of Hamon energy, which damages mobs and players in the area.",
+  "_hamonSkill.sendo_overdrive.desc": "Applying this attack to a wall or floor creates a wave of Hamon energy, which damages mobs and players in the area.\nWhen used on the floor, this creates a narrower wave, or, when the attack is charged for longer, an area of effect.",
   "hamonSkill.turquoise_blue_overdrive.name": "Подводный бирюзовый Овердрайв",
   "_hamonSkill.turquoise_blue_overdrive.desc": "While underwater, the user can transfer a powerful wave of Hamon energy through water.",
   "hamonSkill.sunlight_yellow_overdrive.name": "Солнечно-жёлтый Овердрайв",
