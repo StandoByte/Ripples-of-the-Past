@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -38,7 +39,8 @@ public class ClStopHeldActionPacket {
         public void handle(ClStopHeldActionPacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ctx.get().getSender();
             IPower.getPowerOptional(player, msg.classification).ifPresent(power -> {
-                if (power.getHeldAction() != null) {
+                Action<?> heldAction = power.getHeldAction();
+                if (heldAction != null && !heldAction.commitToWindup) {
                     power.stopHeldAction(msg.shouldFire);
                 }
             });

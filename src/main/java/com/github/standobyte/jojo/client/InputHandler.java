@@ -752,8 +752,11 @@ public class InputHandler {
         
         PowerClassification powerClass = power.getPowerClassification();
         
-        if (!keyHeld && power.getHeldAction() != null && !CommandsMap.dontStopHeld) {
-            stopHeldAction(power);
+        if (!keyHeld && !CommandsMap.dontStopHeld) {
+            Action<?> action = power.getHeldAction();
+            if (action != null && !action.commitToWindup) {
+                stopHeldAction(power);
+            }
         }
         
         boolean targetUpdatePrevTick = prevTargetUpdateTick.contains(powerClass);

@@ -74,6 +74,8 @@ public class TimeStop extends StandAction {
         this.timeResumeSound = builder.timeResumeSound;
         this.shaderWithAnim = builder.shaderWithAnim;
         this.shaderOld = builder.shaderOld;
+        
+        voiceLineDelay = 0;
     }
     
     @Override

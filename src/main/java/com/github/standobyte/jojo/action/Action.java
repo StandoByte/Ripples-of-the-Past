@@ -62,6 +62,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public final int holdDurationToFire;
     private final int holdDurationMax;
     protected final boolean continueHolding;
+    public boolean commitToWindup = false;
     private final float heldWalkSpeed;
     private final int cooldownTechnical;
     public final int cooldown;
