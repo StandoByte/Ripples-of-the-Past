@@ -36,6 +36,7 @@ public class StandEntityTask {
     private final StandEntityAction action;
     @Nonnull
     private ActionTarget target = ActionTarget.EMPTY;
+    public ActionTarget affectedTarget = ActionTarget.EMPTY;
     private int startingTicks;
     private int ticksLeft;
     @Nonnull

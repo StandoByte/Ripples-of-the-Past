@@ -46,7 +46,7 @@ public class GoldExperienceEntityLifeshot extends StandEntityActionModifier {
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
-            Entity targetEntity = task.getTarget().getEntity();
+            Entity targetEntity = task.affectedTarget.getEntity();
             if (targetEntity instanceof LivingEntity) {
                 LivingEntity targetLiving = (LivingEntity) targetEntity;
                 targetLiving = StandUtil.getStandUser(targetLiving);

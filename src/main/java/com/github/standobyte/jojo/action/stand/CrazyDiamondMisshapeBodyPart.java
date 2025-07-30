@@ -54,8 +54,8 @@ public class CrazyDiamondMisshapeBodyPart extends StandEntityActionModifier {
         if (hitPart == null) return;
         
         boolean triggerEffect = task.getTicksLeft() <= 1;
-        if (task.getAdditionalData().isEmpty(TriggeredFlag.class) && task.getTarget().getType() == TargetType.ENTITY) {
-            Entity entity = task.getTarget().getEntity();
+        if (task.getAdditionalData().isEmpty(TriggeredFlag.class) && task.affectedTarget.getType() == TargetType.ENTITY) {
+            Entity entity = task.affectedTarget.getEntity();
             if (entity.isAlive() && entity instanceof LivingEntity) {
                 if (world.isClientSide()) {
                     if (ClientUtil.canSeeStands()) {

@@ -108,8 +108,8 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
     @Override
     public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         boolean triggerEffect = task.getTicksLeft() <= 1;
-        if (task.getAdditionalData().isEmpty(TriggeredFlag.class) && task.getTarget().getType() == TargetType.ENTITY) {
-            Entity entity = task.getTarget().getEntity();
+        if (task.getAdditionalData().isEmpty(TriggeredFlag.class) && task.affectedTarget.getType() == TargetType.ENTITY) {
+            Entity entity = task.affectedTarget.getEntity();
             if (entity.isAlive() && entity instanceof LivingEntity && !(entity instanceof SkeletonEntity) && !(entity instanceof StandEntity)) {
                 if (world.isClientSide()) {
                     if (ClientUtil.canSeeStands()) {

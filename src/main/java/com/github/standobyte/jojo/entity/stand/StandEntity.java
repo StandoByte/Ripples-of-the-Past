@@ -1829,6 +1829,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             punchInstance = emptyPunchInstance;
             break;
         }
+        task.affectedTarget = target;
         
         onTargetHit(CallOrder.BEFORE, punchInstance);
         punchInstance.doHit(task);
