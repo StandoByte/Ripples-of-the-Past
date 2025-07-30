@@ -11,7 +11,7 @@ import net.minecraft.util.ResourceLocation;
 public class BladeHatRenderer extends SimpleEntityRenderer<BladeHatEntity, BladeHatEntityModel> {
 
     public BladeHatRenderer(EntityRendererManager renderManager) {
-        super(renderManager, new BladeHatEntityModel(), new ResourceLocation(JojoMod.MOD_ID, "textures/entity/projectiles/blade_hat.png"));
+        super(renderManager, new BladeHatEntityModel(), new ResourceLocation(JojoMod.MOD_ID, "textures/entity/projectiles/opened_blade_hat.png"));
     }
 
 }
