@@ -176,6 +176,8 @@ public abstract class StandAction extends Action<IStandPower> {
     
     public void onMaxTraining(IStandPower power) {}
     
+    public void onProgressionSkipped(IStandPower power) {}
+    
     @Override
     protected int getCooldownAdditional(IStandPower power, int ticksHeld) {
         int cooldown = super.getCooldownAdditional(power, ticksHeld);

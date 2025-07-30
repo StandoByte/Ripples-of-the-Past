@@ -552,6 +552,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 .forEach(action -> {
                     actionLearningProgressMap.addEntry(action, getType());
                     setLearningProgressPoints(action, action.getMaxTrainingPoints(this));
+                    action.onProgressionSkipped(this);
                 });
             }
         }

@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.client.ui.screen.stand.ge.ChooseLifeformScreen
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.modcompat.ModInteractionUtil.ResLocSet;
+import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.potion.StandVirusEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
@@ -35,6 +36,7 @@ import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
 import net.minecraft.entity.passive.AmbientEntity;
 import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.world.World;
@@ -57,6 +59,19 @@ public class GoldExperienceChooseLifeform extends StandAction {
         if (!world.isClientSide()) {
             user.getCapability(PlayerUtilCapProvider.CAPABILITY).map(PlayerUtilCap::getMetMobs).ifPresent(
                     metMobs -> metMobs.updateNativeMobs((ServerWorld) world, user, true));
+        }
+    }
+    
+    @Override
+    public void onProgressionSkipped(IStandPower power) {
+        super.onProgressionSkipped(power);
+        LivingEntity user = power.getUser();
+        if (user instanceof ServerPlayerEntity) {
+            ServerPlayerEntity player = (ServerPlayerEntity) user;
+            GoldExperienceChooseLifeform.unlockAllEntityTypes(player);
+            player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(data -> {
+                PacketManager.sendToClient(data.getGELifeformsUIState().makePacket(), player);
+            });
         }
     }
     
