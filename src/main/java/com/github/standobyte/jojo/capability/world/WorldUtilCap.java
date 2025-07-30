@@ -17,6 +17,7 @@ public class WorldUtilCap {
     final TimeStopHandler timeStops;
     private final Queue<EggEntity> chargedEggs = new LinkedList<>();
     private final List<TreeLeavesDecay> decayingTrees = new LinkedList<>();
+//    public final Map<UUID, HamonProjectileShieldEntity> projectileShields = new HashMap<>();
     
     public WorldUtilCap(World world) {
         this.world = world;
