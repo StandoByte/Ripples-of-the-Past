@@ -56,7 +56,7 @@ public class MrPresidentEnteredRoomEffect extends StandEffectInstance {
                     BlockPos roomLowerCorner = MrPresidentInsideTeleporter.getLowerCornerRoomPos(mrPresidentWorld, roomId);
                     if (roomLowerCorner != null) {
                         mrPresidentWorld.getChunkSource()
-                        .getChunkFuture(roomLowerCorner.getX(), roomLowerCorner.getZ(), ChunkStatus.FULL, true)
+                        .getChunkFutureMainThread(roomLowerCorner.getX(), roomLowerCorner.getZ(), ChunkStatus.FULL, true)
                         .thenRun(() -> {
                             teleportEntitiesBack(mrPresidentWorld, roomLowerCorner, entity -> entity instanceof LivingEntity && !(entity instanceof ArmorStandEntity));
                         });
@@ -76,7 +76,7 @@ public class MrPresidentEnteredRoomEffect extends StandEffectInstance {
             BlockPos roomLowerCorner = MrPresidentInsideTeleporter.getLowerCornerRoomPos(mrPresidentWorld, roomId);
             if (roomLowerCorner != null) {
                 mrPresidentWorld.getChunkSource()
-                .getChunkFuture(roomLowerCorner.getX(), roomLowerCorner.getZ(), ChunkStatus.FULL, true)
+                .getChunkFutureMainThread(roomLowerCorner.getX(), roomLowerCorner.getZ(), ChunkStatus.FULL, true)
                 .thenRun(() -> {
                     breakAndTeleportBlocks(mrPresidentWorld, roomLowerCorner);
                     teleportEntitiesBack(mrPresidentWorld, roomLowerCorner, null);
