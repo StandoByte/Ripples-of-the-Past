@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.mrpresident;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -12,6 +14,7 @@ import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentInsideTeleporter;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.world.dimension.ModDimensions;
+import com.mojang.datafixers.util.Either;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -21,6 +24,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.server.ChunkHolder;
+import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 
 public class MrPresidentEnteredRoomEffect extends StandEffectInstance {
@@ -55,8 +61,8 @@ public class MrPresidentEnteredRoomEffect extends StandEffectInstance {
                     ServerWorld mrPresidentWorld = server.getLevel(ModDimensions.MR_PRESIDENT);
                     BlockPos roomLowerCorner = MrPresidentInsideTeleporter.getLowerCornerRoomPos(mrPresidentWorld, roomId);
                     if (roomLowerCorner != null) {
-                        mrPresidentWorld.getChunkSource()
-                        .getChunkFutureMainThread(roomLowerCorner.getX(), roomLowerCorner.getZ(), ChunkStatus.FULL, true)
+                        getChunkFuture(mrPresidentWorld.getChunkSource(), 
+                                roomLowerCorner.getX(), roomLowerCorner.getZ(), ChunkStatus.FULL, true)
                         .thenRun(() -> {
                             teleportEntitiesBack(mrPresidentWorld, roomLowerCorner, entity -> entity instanceof LivingEntity && !(entity instanceof ArmorStandEntity));
                         });
@@ -75,8 +81,8 @@ public class MrPresidentEnteredRoomEffect extends StandEffectInstance {
             ServerWorld mrPresidentWorld = server.getLevel(ModDimensions.MR_PRESIDENT);
             BlockPos roomLowerCorner = MrPresidentInsideTeleporter.getLowerCornerRoomPos(mrPresidentWorld, roomId);
             if (roomLowerCorner != null) {
-                mrPresidentWorld.getChunkSource()
-                .getChunkFutureMainThread(roomLowerCorner.getX(), roomLowerCorner.getZ(), ChunkStatus.FULL, true)
+                getChunkFuture(mrPresidentWorld.getChunkSource(), 
+                        roomLowerCorner.getX(), roomLowerCorner.getZ(), ChunkStatus.FULL, true)
                 .thenRun(() -> {
                     breakAndTeleportBlocks(mrPresidentWorld, roomLowerCorner);
                     teleportEntitiesBack(mrPresidentWorld, roomLowerCorner, null);
@@ -134,6 +140,23 @@ public class MrPresidentEnteredRoomEffect extends StandEffectInstance {
     @Override
     protected boolean needsTarget() {
         return false;
+    }
+    
+    
+    public static CompletableFuture<Either<IChunk, ChunkHolder.IChunkLoadingError>> getChunkFuture(ServerChunkProvider chunkProvider, 
+            int chunkX, int chunkY, ChunkStatus requiredStatus, boolean load) {
+        boolean flag = Thread.currentThread() == chunkProvider.mainThread;
+        CompletableFuture<Either<IChunk, ChunkHolder.IChunkLoadingError>> future;
+        if (flag) {
+            future = chunkProvider.getChunkFutureMainThread(chunkX, chunkY, requiredStatus, load);
+            chunkProvider.mainThreadProcessor.managedBlock(future::isDone);
+        } else {
+            future = CompletableFuture.supplyAsync(() -> {
+                return chunkProvider.getChunkFutureMainThread(chunkX, chunkY, requiredStatus, load);
+            }, chunkProvider.mainThreadProcessor).thenCompose(Function.identity());
+        }
+
+        return future;
     }
 
 }
