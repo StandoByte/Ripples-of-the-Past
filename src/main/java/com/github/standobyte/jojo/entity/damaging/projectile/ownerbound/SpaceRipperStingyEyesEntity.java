@@ -1,8 +1,6 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
-import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
@@ -22,7 +20,6 @@ import net.minecraft.world.World;
 
 public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
     private static final DataParameter<Float> LENGTH = EntityDataManager.defineId(SpaceRipperStingyEyesEntity.class, DataSerializers.FLOAT);
-    private INonStandPower ownerPower;
     private boolean rightEye;
     private Vector3d detachedOriginPos;
 
@@ -44,11 +41,15 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
         if (!isBoundToOwner()) {
             detachedOriginPos = detachedOriginPos.add(position().subtract(xOld, yOld, zOld));
         }
-        if (isBoundToOwner() && (ownerPower == null || ownerPower.getHeldAction() != ModVampirismActions.VAMPIRISM_SPACE_RIPPER_STINGY_EYES.get())) {
-            if (!level.isClientSide()) {
-                setBoundToOwner(false);
-                setDeltaMovement(position().subtract(getOriginPoint()).normalize().scale(movementSpeed()));
-            }
+        if (tickCount > 20) {
+            detach();
+        }
+    }
+    
+    public void detach() {
+        if (isBoundToOwner() && !level.isClientSide()) {
+            setBoundToOwner(false);
+            setDeltaMovement(position().subtract(getOriginPoint()).normalize().scale(movementSpeed()));
         }
     }
     
@@ -69,9 +70,6 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
     @Override
     public void setOwner(Entity owner) {
         super.setOwner(owner);
-        if (owner instanceof LivingEntity) {
-            ownerPower = INonStandPower.getNonStandPowerOptional((LivingEntity) owner).orElse(null);
-        }
     }
     
     private void setLength(float length) {
