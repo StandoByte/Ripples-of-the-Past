@@ -704,15 +704,15 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
 
     public void setStandPose(StandPose pose) {
-        if (pose == TimeStop.ANIM) {
-            ticksSinceTS = 0;
-        }
-        else if (this.standPose == TimeStop.ANIM) {
-            ticksSinceTS = -1;
-        }
-        
         if (this.standPose != pose) {
             if (level.isClientSide()) {
+                if (pose == TimeStop.ANIM) {
+                    ticksSinceTS = 0;
+                }
+                else if (this.standPose == TimeStop.ANIM) {
+                    ticksSinceTS = -1;
+                }
+                
                 this.setPoseTime = tickCount;
                 if (pose == StandPose.BARRAGE) {
                     getBarrageSwingsHolder().resetSwingTime();
