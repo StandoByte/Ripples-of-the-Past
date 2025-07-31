@@ -45,6 +45,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.LadybugBroo
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.MobStuckArrowLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.PillarmanBladesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.PillarmanLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.SRSEEyesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.VampireEyesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.WindCloakLayer;
@@ -371,6 +372,7 @@ public class ClientSetup {
         renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));
         renderer.addLayer(new WindCloakLayer<>(renderer));
         renderer.addLayer(new VampireEyesLayer<>(renderer));
+        renderer.addLayer(new SRSEEyesLayer<>(renderer));
         renderer.addLayer(new HamonProtectionLayer<>(renderer));
     }
     

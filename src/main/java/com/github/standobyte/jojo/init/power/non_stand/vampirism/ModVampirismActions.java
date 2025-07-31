@@ -31,8 +31,8 @@ public class ModVampirismActions {
             () -> new VampirismFreeze(new NonStandAction.Builder().holdEnergyCost(0.45F).heldWalkSpeed(0.75F).needsFreeMainHand()));
 
     public static final RegistryObject<VampirismAction> VAMPIRISM_SPACE_RIPPER_STINGY_EYES = ACTIONS.register("vampirism_space_ripper_stingy_eyes", 
-            () -> new VampirismSpaceRipperStingyEyes(new NonStandAction.Builder().holdType(20)
-                    .holdEnergyCost(20F).cooldown(50).heldWalkSpeed(0.3F).ignoresPerformerStun()));
+            () -> new VampirismSpaceRipperStingyEyes(new NonStandAction.Builder().holdToFire(20, true)
+                    .energyCost(20).ignoresPerformerStun()));
 
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_GIFT = ACTIONS.register("vampirism_blood_gift", 
             () -> new VampirismBloodGift(new NonStandAction.Builder().holdToFire(60, false)
