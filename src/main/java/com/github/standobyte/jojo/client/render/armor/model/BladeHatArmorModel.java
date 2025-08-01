@@ -2,9 +2,14 @@ package com.github.standobyte.jojo.client.render.armor.model;
 
 import java.util.Collections;
 
+import com.github.standobyte.jojo.init.ModItems;
+
 import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ItemStack;
 
 // Made with Blockbench 3.9.2
 
@@ -82,5 +87,12 @@ public class BladeHatArmorModel extends BipedModel<LivingEntity> {
         modelRenderer.xRot = x;
         modelRenderer.yRot = y;
         modelRenderer.zRot = z;
+    }
+    
+    public static void modifyOuterLayer(PlayerModel<?> playerModel, LivingEntity entity) {
+        ItemStack headItem = entity.getItemBySlot(EquipmentSlotType.HEAD);
+        if (!headItem.isEmpty() && headItem.getItem() == ModItems.BLADE_HAT.get()) {
+            playerModel.hat.visible = false;
+        }
     }
 }
