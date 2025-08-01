@@ -706,13 +706,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public void setStandPose(StandPose pose) {
         if (this.standPose != pose) {
             if (level.isClientSide()) {
-                if (pose == TimeStop.ANIM) {
-                    ticksSinceTS = 0;
-                }
-                else if (this.standPose == TimeStop.ANIM) {
-                    ticksSinceTS = -1;
-                }
-                
                 this.setPoseTime = tickCount;
                 if (pose == StandPose.BARRAGE) {
                     getBarrageSwingsHolder().resetSwingTime();
@@ -730,13 +723,12 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return summonPoseRandomByte;
     }
     
-    protected int ticksSinceTS = -1;
     public StandPoseData getCurPose(float partialTick) {
-        if (ticksSinceTS >= 0) {
+        if (standPose == TimeStop.ANIM) {
             return StandPoseData.start()
                     .standPose(TimeStop.ANIM)
                     .actionPhase(StandEntityAction.Phase.PERFORM)
-                    .animTime(ticksSinceTS + partialTick)
+                    .animTime(tickCount - setPoseTime + partialTick)
                     .end();
         }
         LivingEntity user = getUser();
@@ -1325,7 +1317,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             }
             
             ++overlayTickCount;
-            if (ticksSinceTS >= 0) ++ticksSinceTS;
         }
         
         if (level.isClientSide() && offsetLerpTicks < offsetLerpMaxTicks) {
