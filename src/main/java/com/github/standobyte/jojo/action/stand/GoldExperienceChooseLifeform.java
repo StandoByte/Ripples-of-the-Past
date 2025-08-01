@@ -70,6 +70,7 @@ public class GoldExperienceChooseLifeform extends StandAction {
             ServerPlayerEntity player = (ServerPlayerEntity) user;
             GoldExperienceChooseLifeform.unlockAllEntityTypes(player);
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(data -> {
+                data.metEntityTypes.syncToClient(player);
                 PacketManager.sendToClient(data.getGELifeformsUIState().makePacket(), player);
             });
         }

@@ -86,7 +86,7 @@ public class PlayerUtilCap {
     private final List<PlayerStatListener<?>> statChangeListeners = new ArrayList<>();
     private final List<TimedAction> sendWhenScreenClosed = new ArrayList<>();
 
-    private LifeformsMetMobs metEntityTypes = new LifeformsMetMobs();
+    public LifeformsMetMobs metEntityTypes = new LifeformsMetMobs();
     private final LifeformsUIState geUIState;
     public int animalAgeCd;
     
