@@ -76,17 +76,21 @@ public class MrPresidentEnteredRoomEffect extends StandEffectInstance {
     @Override
     protected void stop() {
         if (!world.isClientSide()) {
-            ServerWorld serverWorld = (ServerWorld) world;
-            MinecraftServer server = serverWorld.getServer();
-            ServerWorld mrPresidentWorld = server.getLevel(ModDimensions.MR_PRESIDENT);
-            BlockPos roomLowerCorner = MrPresidentInsideTeleporter.getLowerCornerRoomPos(mrPresidentWorld, roomId);
-            if (roomLowerCorner != null) {
-                getChunkFuture(mrPresidentWorld.getChunkSource(), 
-                        roomLowerCorner.getX(), roomLowerCorner.getZ(), ChunkStatus.FULL, true)
-                .thenRun(() -> {
-                    breakAndTeleportBlocks(mrPresidentWorld, roomLowerCorner);
-                    teleportEntitiesBack(mrPresidentWorld, roomLowerCorner, null);
-                });
+            ServerWorld turtleWorld = (ServerWorld) world;
+            boolean isChunkLoaded = turtleWorld.isLoaded(user.blockPosition());
+            boolean isTurtleBeingUnloaded = !isChunkLoaded;
+            if (!isTurtleBeingUnloaded) {
+                MinecraftServer server = turtleWorld.getServer();
+                ServerWorld mrPresidentWorld = server.getLevel(ModDimensions.MR_PRESIDENT);
+                BlockPos roomLowerCorner = MrPresidentInsideTeleporter.getLowerCornerRoomPos(mrPresidentWorld, roomId);
+                if (roomLowerCorner != null) {
+                    getChunkFuture(mrPresidentWorld.getChunkSource(), 
+                            roomLowerCorner.getX(), roomLowerCorner.getZ(), ChunkStatus.FULL, true)
+                    .thenRun(() -> {
+                        breakAndTeleportBlocks(mrPresidentWorld, roomLowerCorner);
+                        teleportEntitiesBack(mrPresidentWorld, roomLowerCorner, null);
+                    });
+                }
             }
         }
     }
