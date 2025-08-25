@@ -278,7 +278,7 @@ public class TimeStop extends StandAction {
             this.timeStopMaxTicks = forHuman;
             this.timeStopMaxTicksZombie = forZombie;
             this.timeStopMaxTicksVampire = forVampire;
-            this.timeStopMaxTicksPillarman = forVampire;
+            this.timeStopMaxTicksPillarman = forPillarman;
             return getThis();
         }
 
