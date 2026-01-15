@@ -24,6 +24,8 @@ import com.github.standobyte.jojo.action.stand.punch.IPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
+import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
+import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.player.PlayerClientBroadcastedSettings;
@@ -118,6 +120,8 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
@@ -2079,6 +2083,18 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             }
             if (MCUtil.destroyBlock(level, blockPos, dropItem, this)) {
                 blockState.getBlock().destroy(level, blockPos, blockState);
+                
+                if (createdDrops != null) {
+                    IChunk chunk = level.getChunk(blockPos);
+                    if (chunk instanceof Chunk) {
+                        ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> {
+                            PrevBlockInfo brokenBlock = cap.getBrokenBlockAt(blockPos);
+                            if (brokenBlock != null) {
+                            	createdDrops.forEach(droppedItem -> brokenBlock.drops.add(droppedItem.copy()));
+                            }
+                        });
+                    }
+                }
                 return true;
             }
         }

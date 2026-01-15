@@ -56,6 +56,7 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
                     List<ItemStack> drops = Block.getDrops(blockState, (ServerWorld) world, pos, 
                             blockState.hasTileEntity() ? world.getBlockEntity(pos) : null);
                     ItemStack item = drops.isEmpty() ? ItemStack.EMPTY : drops.get(0);
+                    fillAnchorNbt(item, world, pos, blockState);
                     if (standEntity.breakBlockWithExternalDrops(pos, blockState, 
                             item.isEmpty() ? null : Util.make(new ArrayList<>(), list -> list.add(item)))) {
                         makeAnchor(standEntity, item, world, pos, blockState);
@@ -76,7 +77,6 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
         if (!drop.isEmpty()) {
             boolean dropItem = true;
             if (blockState == null || drop.getItem() instanceof BlockItem) {
-                fillAnchorNbt(drop, world, blockPos, blockState);
                 LivingEntity user = standEntity.getUser();
                 dropItem = !(user instanceof PlayerEntity && ((PlayerEntity) user).inventory.add(drop) && drop.isEmpty());
             }

@@ -187,7 +187,7 @@ public class ChunkCap {
         public PrevBlockInfo(BlockPos pos, BlockState state, List<ItemStack> drops, boolean keep) {
             this.pos = pos;
             this.state = state;
-            this.drops = drops.stream().map(stack -> stack.copy()).collect(Collectors.toList());
+            this.drops = drops.stream().map(stack -> stack.copy()).collect(Collectors.toCollection(ArrayList::new));
             this.keep = keep;
         }
         
