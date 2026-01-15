@@ -8,7 +8,7 @@ public class MolangInterpreter {
     
     public static void init() {
         if (mochaInstance == null) {
-            mochaInstance = MochaEngine.createStandard();
+            mochaInstance = MochaEngineWithoutJavassist.createStandard();
             mochaInstance.scope().set(AnimMolangQuery.NAMESPACE, AnimMolangQuery.instance);
         }
     }
