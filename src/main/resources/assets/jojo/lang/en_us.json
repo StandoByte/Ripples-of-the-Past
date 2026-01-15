@@ -986,7 +986,7 @@
   "hamonSkill.plant_item_infusion.name": "Plants Infusion (item)",
   "hamonSkill.plant_item_infusion.desc": "When throwing out a plant, the user charges it with Hamon. Mobs and players getting too close to it will take Hamon damage.",
   "hamonSkill.arrow_infusion.name": "Arrow Infusion",
-  "hamonSkill.arrow_infusion.desc": "Arrows and tridents the user shoots inflict additional Hamon damage.",
+  "hamonSkill.arrow_infusion.desc": "Projectiles the user shoots, like arrows, knives and tridents, inflict additional Hamon damage.",
   "hamonSkill.zoom_punch.name": "Zoom Punch",
   "hamonSkill.zoom_punch.desc": "Extends the user's arm, allowing them to punch an enemy from longer distance, additionally dealing Hamon damage.",
   "hamonSkill.jump.name": "Leap",
