@@ -350,7 +350,7 @@ public class GameplayEventHandler {
         if (event.getWorld() instanceof ServerWorld) {
             MinecraftServer server = ((ServerWorld) event.getWorld()).getServer();
             for (RegistryObject<? extends Feature<?>> featureSupplier : ModStructures.FEATURES.getEntries()) {
-                Feature<?> feature = featureSupplier.get();
+                Feature<?> feature = (Feature<?>) featureSupplier.get();
                 if (feature instanceof LoadMeFeature) {
                     ((LoadMeFeature) feature).loadTemplate(server);
                 }
