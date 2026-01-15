@@ -583,10 +583,12 @@ public class GameplayEventHandler {
                 if (dmgSource instanceof IStandDamageSource) {
                     ((IStandDamageSource) dmgSource).setStandCanHitSelf();
                 }
-                attackerLiving.hurt(dmgSource, event.getAmount());
+                boolean dealtDamage = attackerLiving.hurt(dmgSource, event.getAmount());
                 event.setCanceled(true);
-                IStandPower geUserPower = targetLifeform.get().getUserPower();
-                ResolveCounter.addResolve(geUserPower, target, event.getAmount());
+                if (dealtDamage) {
+                	IStandPower geUserPower = targetLifeform.get().getUserPower();
+                	ResolveCounter.addResolve(geUserPower, target, event.getAmount());
+                }
                 return;
             }
         }
