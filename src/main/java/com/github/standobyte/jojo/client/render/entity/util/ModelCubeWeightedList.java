@@ -63,7 +63,7 @@ public class ModelCubeWeightedList {
     }
     
     public static ModelCubeWeightedList fromModelParts(Stream<ModelRenderer> modelParts) {
-        Map<ModelRenderer, ModelPartParents> inModModelParts = modelParts.collect(Collectors.toMap(
+        Map<ModelRenderer, ModelPartParents> inModModelParts = modelParts.distinct().collect(Collectors.toMap(
                 Function.identity(), ModelPartParents::new, (po,huy) -> huy, HashMap::new));
         
         List<ModelPartParents> prevGen = new ArrayList<>(inModModelParts.values());
