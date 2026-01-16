@@ -24,8 +24,8 @@ import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
 import com.github.standobyte.jojo.item.ModCreativeTab;
-import com.github.standobyte.jojo.item.MrPresidentKeyItem;
 import com.github.standobyte.jojo.item.MolotovItem;
+import com.github.standobyte.jojo.item.MrPresidentKeyItem;
 import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.item.PhotoItem;
 import com.github.standobyte.jojo.item.PolaroidItem;
@@ -50,6 +50,7 @@ import net.minecraft.item.DyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemTier;
+import net.minecraft.item.Items;
 import net.minecraft.item.Rarity;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraftforge.common.ForgeSpawnEggItem;
@@ -98,7 +99,7 @@ public class ModItems {
             () -> new BubbleGlovesItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1))); 
     
     public static final RegistryObject<SoapItem> SOAP = ITEMS.register("soap", 
-            () -> new SoapItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+            () -> new SoapItem(new Item.Properties().tab(MAIN_TAB).craftRemainder(Items.GLASS_BOTTLE).stacksTo(1)));
     
 //    public static final RegistryObject<LuckPluckSwordItem> LUCK_SWORD = ITEMS.register("luck_sword", 
 //            () -> new LuckPluckSwordItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
