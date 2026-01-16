@@ -898,6 +898,8 @@ public class ActionsOverlayGui extends AbstractGui {
             break;
         }
         if (highlightSelection) {
+        	RenderSystem.enableBlend();
+        	RenderSystem.defaultBlendFunc();
             int highlightAlpha = (int) (ClientUtil.getHighlightAlpha(tickCount + partialTick, 40F, 40F, 0.25F, 0.5F) * 255F);
             if (selected >= 0) {
                 ClientUtil.fillSingleRect(x + hotbarFold.getSlotWithIndex(selected).pos - 4, y - 4, 24, 23, 255, 255, 255, highlightAlpha);
