@@ -156,6 +156,16 @@ public class ControllerSoul {
     public void cancelRespawnScreen(GuiOpenEvent event) {
         boolean soul = isCameraEntityPlayerSoul();
         if (event.getGui() instanceof DeathScreen) {
+        	if (mc.screen instanceof DeathScreen) {
+        		/* When the player dies in nether handle, this causes the game to repeatedly open DeathScreen
+        		 * (ClientPlayerEntity#handleNetherPortalClient() tries to close the screen, but the game opens DeathScreen instead).
+        		 * The vanilla crutch is the fact that the player's entity is removed after 20 death ticks, 
+        		 * so ClientPlayerEntity#handleNetherPortalClient() isn't called anymore, escaping the loop.
+        		 * We don't want the player entity to be removed, so this ACTUALLY patches the bug.
+        		 */
+        		event.setCanceled(true);
+        		return;
+        	}
             if (!soulEntityWaiting && firstDeathFrame && standPower.willSoulSpawn()) {
                 soulEntityWaiting = true;
                 firstDeathFrame = false;
