@@ -312,6 +312,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
         if (collideBlocks) {
             BlockCollisionResult collision = CollideBlocks.collideBoundingBox(movementVec, aabb, serverWorld, selectionContext);
 
+			MutableFloat impactStrengthNew = new MutableFloat(knockbackImpactStrength);
             if (collision.blocks.size() > 0) {
                 collision.blocks.stream()
                 .distinct()
@@ -355,11 +356,11 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                         if (entity.isOnFire()) {
                             MCUtil.blockCatchFire(world, blockPos, blockState, null, asLiving);
                         }
-                        
-                        setKnockbackImpactStrength(getKnockbackImpactStrength() - Math.max(useImpactStrength, 0.05f));
+
+						impactStrengthNew.setValue(impactStrengthNew.floatValue() - Math.max(useImpactStrength, 0.05f));
                     }
-                    
-                    return getKnockbackImpactStrength() > 0;
+
+					return impactStrengthNew.floatValue() > 0;
                 });
                 
                 Vector3d collisionDir = new Vector3d(collision.movementX - collision.x, collision.movementY - collision.y, collision.movementZ - collision.z);
@@ -393,7 +394,8 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                         hurtTarget(entity, DamageSource.FLY_INTO_WALL, wallDamage.floatValue());
                     }
                 }
-                
+
+//				setKnockbackImpactStrength(impactStrengthNew.floatValue());
                 reset();
             }
         }
