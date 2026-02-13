@@ -717,6 +717,8 @@
   "jojo.config.client.menacingParticles.tooltip": "Enable ゴゴゴゴゴ particles when AFK.",
   "jojo.config.client.timeStopAnimation": "Time stop animation",
   "jojo.config.client.timeStopAnimation.tooltip": "Enables the visual effect at the beginning of time stop when its duration is 5 seconds or longer.",
+  "jojo.config.client.timeStopWindEffect": "Time stop Wind Effect",
+  "jojo.config.client.timeStopWindEffect.tooltip": "Enables the visual effect in the time stop. Like a small lines that looks like wind...",
   "jojo.config.client.standSide": "Stand offset side",
   "jojo.config.client.standSide.tooltip": "Whether your Stand is to the left or to the right of you when idle.",
   "jojo.config.client.option.stand_left": "Left",
