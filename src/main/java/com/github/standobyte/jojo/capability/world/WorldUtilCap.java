@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 
+import com.github.standobyte.jojo.mechanics.speechbubble.clowning.WorldTypingPlayers;
 import com.github.standobyte.jojo.util.TreeLeavesDecay;
 
 import net.minecraft.entity.Entity;
@@ -19,13 +20,17 @@ public class WorldUtilCap {
     private final List<TreeLeavesDecay> decayingTrees = new LinkedList<>();
 //    public final Map<UUID, HamonProjectileShieldEntity> projectileShields = new HashMap<>();
     
+    public final WorldTypingPlayers peepoClown;
+    
     public WorldUtilCap(World world) {
         this.world = world;
         this.timeStops = new TimeStopHandler(world);
+        this.peepoClown = new WorldTypingPlayers(world);
     }
     
     public void tick() {
         timeStops.tick();
+        peepoClown.filterRemovedPlayers();
         if (!world.isClientSide()) {
             tickEggsQueue();
             tickGETreesDecay();

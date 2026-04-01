@@ -55,6 +55,7 @@ import com.github.standobyte.jojo.power.impl.stand.ResolveCounter;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.subsystems.timestop.EntityTimeStop;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.CollisionUtil;
@@ -1052,7 +1053,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
 
     public boolean canStartBlocking() {
-        if (!canUpdate() || entityData.get(NO_BLOCKING_TICKS) > 0) {
+        if (!EntityTimeStop.canUpdate(this) || entityData.get(NO_BLOCKING_TICKS) > 0) {
             return false;
         }
         return getCurrentTask().map(task -> task.getAction().canBeCanceled(userPower, 
@@ -1106,7 +1107,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
 
     public boolean canBlockOrParryFromAngle(Vector3d dmgPosition) {
-        if (!canUpdate()) {
+        if (!EntityTimeStop.canUpdate(this)) {
             return false;
         }
         if (dmgPosition == null) {

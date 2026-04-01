@@ -4,12 +4,12 @@ import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.client.ClientTicking.ITicking;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
+import com.github.standobyte.jojo.mechanics.speechbubble.clowning.WorldTypingPlayers;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.ISound.AttenuationType;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.BlockPos;
@@ -22,9 +22,10 @@ public class ClientTimeStopHandler implements ITicking {
     private boolean isTimeStopped = false;
     private boolean canSeeInStoppedTime = true;
     private boolean canMoveInStoppedTime = true;
-    private float partialTickStoppedAt;
+    public float partialTickStoppedAt;
 
-    private int timeStopTicks = 0;
+    public int timeStopTicks = 0;
+    public int shaderTicks = 0;
     private int timeStopLength = 0;
     
     
@@ -44,7 +45,7 @@ public class ClientTimeStopHandler implements ITicking {
     }
     
     
-    private boolean isTimeStopped(BlockPos blockPos) {
+    public boolean isTimeStopped(BlockPos blockPos) {
         return isTimeStopped(new ChunkPos(blockPos));
     }
 
@@ -99,6 +100,7 @@ public class ClientTimeStopHandler implements ITicking {
                 timeStopLength = 0;
             }
             
+            shaderTicks = 0;
             timeStopTicks = 0;
         }
     }
@@ -129,8 +131,13 @@ public class ClientTimeStopHandler implements ITicking {
     
     @Override
     public void tick() {
-        if (isTimeStopped) {
-            timeStopTicks++;
+        if (mc.level != null) {
+            if (isTimeStopped) {
+                shaderTicks++;
+                if (!WorldTypingPlayers.hasAny(mc.level)) {
+                    timeStopTicks++;
+                }
+            }
         }
     }
     
@@ -151,13 +158,6 @@ public class ClientTimeStopHandler implements ITicking {
         if (isTimeStopped() && !canSeeInStoppedTime) {
             clientTimer.partialTick = partialTickStoppedAt;
         }
-    }
-    
-    public float getConstantEntityPartialTick(Entity entity, float normalPartialTick) {
-        if (!entity.canUpdate() && isTimeStopped(entity.blockPosition())) {
-            return partialTickStoppedAt;
-        }
-        return normalPartialTick;
     }
     
     public boolean shouldCancelSound(ISound sound) {
@@ -185,7 +185,7 @@ public class ClientTimeStopHandler implements ITicking {
         return timeStopTicks;
     }
     
-    public int getTimeStopLength() {
-        return timeStopLength;
+    public int getTimeStopLengthForShader() {
+        return timeStopLength + shaderTicks - timeStopTicks;
     }
 }

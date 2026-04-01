@@ -39,6 +39,7 @@ import com.github.standobyte.jojo.world.dimension.ModDimensions;
 
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.item.ItemGroup;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -74,6 +75,11 @@ public class JojoMod {
         modEventBus.addListener(this::preInit);
         modEventBus.addListener(this::interMod);
         ModTags.initTags();
+    }
+    
+    public static ResourceLocation resLoc(String path) {
+        // looks much better than ResourceLocation.fromNamespaceAndPath, doesn't it? DOESN'T IT, MOJANG??
+        return new ResourceLocation(MOD_ID, path);
     }
 
     private void registerVanillaDeferredRegisters(IEventBus modEventBus) {

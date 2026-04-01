@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
+import com.github.standobyte.jojo.mechanics.speechbubble.clowning.WorldTypingPlayers;
 import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
@@ -31,6 +32,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerState
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityDataPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.subsystems.timestop.EntityTimeStop;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.HashBiMap;
@@ -74,6 +76,8 @@ public class TimeStopHandler {
     
     @SuppressWarnings("deprecation")
     public void tick() {
+        if (WorldTypingPlayers.hasAny(world)) return;
+        
         Iterator<Entity> entityIter = stoppedInTime.iterator();
         
         while (entityIter.hasNext()) {
@@ -82,7 +86,7 @@ public class TimeStopHandler {
                 entityIter.remove();
             }
 
-            else if (!entity.canUpdate()) {
+            else if (!EntityTimeStop.canUpdate(entity)) {
                 tickInStoppedTime(entity);
             }
         }
@@ -91,7 +95,8 @@ public class TimeStopHandler {
             Iterator<Map.Entry<Integer, TimeStopInstance>> instanceIter = timeStopInstances.entrySet().iterator();
             while (instanceIter.hasNext()) {
                 Map.Entry<Integer, TimeStopInstance> entry = instanceIter.next();
-                if (entry.getValue().tick() && !world.isClientSide()) {
+                TimeStopInstance instance = entry.getValue();
+                if (instance.tick() && !world.isClientSide()) {
                     instanceIter.remove();
                     onRemovedTimeStop(entry.getValue());
                 }
@@ -155,7 +160,6 @@ public class TimeStopHandler {
                 }
             }
         }
-        entity.tickCount--;
     }
     
     public boolean isTimeStopped(ChunkPos chunkPos) {
@@ -209,16 +213,13 @@ public class TimeStopHandler {
                 }
             });
             
-            if (timeStopInstances.size() == 1) {
-                SaveFileUtilCapProvider.getSaveFileCap(serverWorld.getServer()).setTimeStopGamerules(serverWorld);
-            }
-            else {
+            if (timeStopInstances.size() > 1) {
                 timeStopInstances.values().forEach(existingInstance -> existingInstance.removeSoundsIfCrosses(instance));
             }
         }
     }
     
-    boolean hasTimeStopInstances() {
+    public boolean hasTimeStopInstances() {
         return !timeStopInstances.isEmpty();
     }
 
@@ -284,9 +285,6 @@ public class TimeStopHandler {
                     sendPlayerState(player);
                 }
             });
-            if (timeStopInstances.isEmpty()) {
-                SaveFileUtilCapProvider.getSaveFileCap(serverWorld.getServer()).restoreTimeStopGamerules(serverWorld);
-            }
         }
         
         instance.onRemoved(world);
@@ -448,14 +446,11 @@ public class TimeStopHandler {
         if (event.phase != TickEvent.Phase.START) {
             return;
         }
+        
+        World world = event.world;
         event.world.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             cap.tick();
         });
-        if (event.world.dimension() == World.OVERWORLD) {
-            event.world.getCapability(SaveFileUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.tick();
-            });
-        }
     }
 
 
@@ -569,5 +564,24 @@ public class TimeStopHandler {
     
     public static ChunkPos getChunkPos(Entity entity) {
         return new ChunkPos(entity.blockPosition());
+    }
+    
+    
+    public static boolean shouldStopDaylightAndWeatherCycles(World world) {
+        TimeStopHandler ts = TimeStopHandler.get(world);
+        if (ts != null && ts.hasTimeStopInstances()) {
+            return true;
+        }
+
+        WorldTypingPlayers tracker = WorldTypingPlayers.get(world);
+        if (tracker != null && !tracker.players.isEmpty()) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public static TimeStopHandler get(World world) {
+        return world.getCapability(WorldUtilCapProvider.CAPABILITY).map(cap -> cap.timeStops).orElse(null);
     }
 }

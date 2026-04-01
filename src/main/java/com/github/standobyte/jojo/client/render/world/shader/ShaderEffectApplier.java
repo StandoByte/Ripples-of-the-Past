@@ -164,9 +164,9 @@ public class ShaderEffectApplier {
         if (ClientTimeStopHandler.getInstance().isTimeStopped()) {
             ClientTimeStopHandler tsFields = ClientTimeStopHandler.getInstance();
             float partialTick = MathHelper.frac(partialSecond * 20F);
-            float tsTick = tsFields.getTimeStopTicks() + partialTick;
+            float tsTick = tsFields.shaderTicks + partialTick;
             tsShader.safeGetUniform("TSTicks") .set(tsTick);
-            tsShader.safeGetUniform("TSLength").set(tsFields.getTimeStopLength());
+            tsShader.safeGetUniform("TSLength").set(tsFields.getTimeStopLengthForShader());
             if (!ClientModSettings.getSettingsReadOnly().timeStopAnimation || tsPosOnScreen == null) {
                 tsShader.safeGetUniform("TSEffectLength").set(0);
             }

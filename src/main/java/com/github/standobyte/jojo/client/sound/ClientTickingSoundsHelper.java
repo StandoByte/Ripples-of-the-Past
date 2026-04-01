@@ -15,18 +15,22 @@ import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.BladeHatEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.mechanics.speechbubble.SpeechBubblesFunctionality;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.EntityTickableSound;
 import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.LocatableSound;
+import net.minecraft.client.audio.SoundEventAccessor;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.sound.SoundEvent.SoundSourceEvent;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -61,7 +65,7 @@ public abstract class ClientTickingSoundsHelper {
         volume = event.getVolume();
         pitch = event.getPitch();
 
-        ISound sound = new EntityTickableSound(soundEvent, category, volume, pitch, entity);
+        LocatableSound sound = new EntityTickableSound(soundEvent, category, volume, pitch, entity);
         if (entity instanceof AbstractClientPlayerEntity && GeneralUtil.orElseFalse(entity.getCapability(ClientPlayerUtilCapProvider.CAPABILITY), cap -> {
             boolean alreadyPlaying = !interrupt && cap.isVoiceLinePlaying();
             if (alreadyPlaying) {
@@ -74,6 +78,15 @@ public abstract class ClientTickingSoundsHelper {
             return !alreadyPlaying;
         })) {
             mc.getSoundManager().play(sound);
+            
+            SoundEventAccessor soundAccessor = sound.resolve(mc.getSoundManager());
+            if (soundAccessor != null) {
+                ITextComponent subtitle = soundAccessor.getSubtitle();
+                if (subtitle != null) {
+                    SpeechBubblesFunctionality.onClientSideEntityVoiceLine(entity, subtitle, soundEvent);
+                }
+            }
+            
             return true;
         }
         else {

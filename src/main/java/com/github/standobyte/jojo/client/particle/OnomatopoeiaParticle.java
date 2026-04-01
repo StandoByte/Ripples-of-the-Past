@@ -29,6 +29,7 @@ public class OnomatopoeiaParticle extends SpriteTexturedParticle {
         xd = xSpeed;
         yd = ySpeed;
         zd = zSpeed;
+        gravity = 0;
     }
     
     @Override

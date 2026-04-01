@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.github.standobyte.jojo.client.ClientTimeStopHandler;
+import com.github.standobyte.jojo.subsystems.timestop.EntityTimeStop;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -42,8 +43,14 @@ public class WorldRendererMixin {
     @ModifyVariable(method = "renderEntity", at = @At("HEAD"), argsOnly = true, ordinal = 0)
     private float jojoTsEntityChangePartialTick(float partialTick, 
             Entity pEntity, double pCamX, double pCamY, double pCamZ, float pPartialTicks, MatrixStack pMatrixStack, IRenderTypeBuffer pBuffer) {
-        if (ClientTimeStopHandler.isTimeStoppedStatic()) {
-            return ClientTimeStopHandler.getInstance().getConstantEntityPartialTick(pEntity, partialTick);
+        if (ClientTimeStopHandler.isTimeStoppedStatic() && !EntityTimeStop.canUpdate(pEntity)) {
+            ClientTimeStopHandler handler = ClientTimeStopHandler.getInstance();
+            if (handler.isTimeStopped(pEntity.blockPosition())) {
+                return handler.partialTickStoppedAt;
+            }
+        }
+        if (!pEntity.canUpdate()) { // for the '26 april fools yapping
+            return 0;
         }
         return partialTick;
     }

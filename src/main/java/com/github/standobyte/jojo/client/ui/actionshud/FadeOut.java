@@ -5,23 +5,23 @@ public class FadeOut {
     protected final int ticksStartFadeOut;
     protected int ticks;
     
-    FadeOut(int ticksMax, int ticksStartFadeOut) {
+    public FadeOut(int ticksMax, int ticksStartFadeOut) {
         this.ticksMax = ticksMax;
         this.ticksStartFadeOut = ticksStartFadeOut;
         this.ticks = 0;
     }
     
-    void reset() {
+    public void reset() {
         ticks = ticksMax;
     }
     
-    void tick() {
+    public void tick() {
         if (ticks > 0) {
             ticks--;
         }
     }
     
-    float getValue(float partialTick) {
+    public float getValue(float partialTick) {
         if (ticks >= ticksStartFadeOut) {
             return 1F;
         }

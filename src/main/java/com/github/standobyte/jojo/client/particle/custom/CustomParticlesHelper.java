@@ -77,11 +77,17 @@ public abstract class CustomParticlesHelper {
     }
     
     
-    
-    public static void addMenacingParticleEmitter(Entity entity, BasicParticleType particle) {
+
+    /**
+     * @return The MenacingParticleEmitter created. Cast it to MenacingParticleEmitter if you need it; 
+     * it's returned as an Object to not crash the dedicated server, because this method is also called in a packet handler.
+     */
+    public static Object addMenacingParticleEmitter(Entity entity, BasicParticleType particle) { return addMenacingParticleEmitter(entity, particle, 1); }
+    public static Object addMenacingParticleEmitter(Entity entity, BasicParticleType particle, double speed) {
         Minecraft mc = Minecraft.getInstance();
-        ClientReflection.getTrackingEmitters(Minecraft.getInstance().particleEngine).add(
-                new MenacingParticleEmitter(mc.level, entity, particle, mc.player));
+        MenacingParticleEmitter emitter = new MenacingParticleEmitter(mc.level, entity, particle, mc.player, speed);
+        ClientReflection.getTrackingEmitters(Minecraft.getInstance().particleEngine).add(emitter);
+        return emitter;
     }
     
     public static boolean createCDRestorationParticle(LivingEntity entity, Hand hand) {

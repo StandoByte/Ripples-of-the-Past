@@ -85,6 +85,7 @@ import com.github.standobyte.jojo.init.power.non_stand.pillarman.ModPillarmanAct
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.OilItem;
+import com.github.standobyte.jojo.mechanics.speechbubble.clowning.WorldTypingPlayers;
 import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.github.standobyte.jojo.mrpresident.CocoJumboTurtleEntity;
@@ -184,6 +185,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.GameType;
+import net.minecraft.world.World;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.ClientChatEvent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -444,6 +446,12 @@ public class ClientEventHandler {
         if (mc.level != null) {
             switch (event.phase) {
             case START:
+                boolean yap = false;
+                WorldTypingPlayers typingPlayers = WorldTypingPlayers.get(mc.level);
+                if (typingPlayers != null && !typingPlayers.players.isEmpty()) {
+                    yap = true;
+                }
+                
                 ActionsOverlayGui.getInstance().tick();
                 
                 if (!mc.isPaused()) {

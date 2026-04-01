@@ -5,6 +5,7 @@ import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.subsystems.timestop.EntityTimeStop;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
 import net.minecraft.entity.Entity;
@@ -34,7 +35,7 @@ public class TheWorldHeavyPunch extends StandEntityHeavyAttack {
 
         @Override
         protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
-            if (!stand.level.isClientSide() && hurt && !target.canUpdate()) {
+            if (!stand.level.isClientSide() && hurt && !EntityTimeStop.canUpdate(target)) {
                 EntityUtilCap.queueOnTimeResume(target, () -> target.playSound(ModSounds.THE_WORLD_PUNCH_HEAVY_TS_IMPACT.get(), 1.0F, 1.0F));
             }
             super.afterAttack(stand, target, dmgSource, task, hurt, killed);

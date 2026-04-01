@@ -9,8 +9,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.entity.mob.rps.RPSPvpGamesMap;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.item.polaroid.PhotosHandler;
@@ -22,8 +20,6 @@ import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
 
@@ -35,11 +31,6 @@ public class SaveFileUtilCap {
     private Map<StandType<?>, Integer> timesStandsTaken = new HashMap<>();
     
     private final RPSPvpGamesMap rpsPvpGames = new RPSPvpGamesMap();
-    
-    private boolean gameruleDayLightCycle;
-    private boolean gameruleWeatherCycle;
-    private boolean usedTimeStop = false;
-    private boolean refreshNextTick = false;
     
     private int walkmanId;
     private int cassetteId;
@@ -58,19 +49,6 @@ public class SaveFileUtilCap {
     
     public UUID getServerUUID() {
         return serverId;
-    }
-    
-    public void tick() {
-        if (refreshNextTick) {
-            if (usedTimeStop) {
-                GameRules gameRules = overworld.getGameRules();
-                MinecraftServer server = overworld.getServer();
-                gameRules.getRule(GameRules.RULE_DAYLIGHT).set(gameruleDayLightCycle, server);
-                gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(gameruleWeatherCycle, server);
-                usedTimeStop = false;
-            }
-            refreshNextTick = false;
-        }
     }
     
     public void onPlayerLogIn(ServerPlayerEntity player) {
@@ -138,42 +116,6 @@ public class SaveFileUtilCap {
     
     
     
-    public void setTimeStopGamerules(ServerWorld world) {
-        if (noTimeStopInstances(world)) {
-            GameRules gameRules = overworld.getGameRules();
-            MinecraftServer server = overworld.getServer();
-            gameruleDayLightCycle = gameRules.getBoolean(GameRules.RULE_DAYLIGHT);
-            gameRules.getRule(GameRules.RULE_DAYLIGHT).set(false, server);
-            gameruleWeatherCycle = gameRules.getBoolean(GameRules.RULE_WEATHER_CYCLE);
-            gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(false, server);
-            usedTimeStop = true;
-        }
-    }
-    
-    public void restoreTimeStopGamerules(ServerWorld world) {
-        if (usedTimeStop && noTimeStopInstances(world)) {
-            GameRules gameRules = overworld.getGameRules();
-            MinecraftServer server = overworld.getServer();
-            gameRules.getRule(GameRules.RULE_DAYLIGHT).set(gameruleDayLightCycle, server);
-            gameRules.getRule(GameRules.RULE_WEATHER_CYCLE).set(gameruleWeatherCycle, server);
-            usedTimeStop = false;
-        }
-    }
-    
-    private boolean noTimeStopInstances(@Nullable ServerWorld except) {
-        MinecraftServer server = overworld.getServer();
-        for (ServerWorld world : server.getAllLevels()) {
-            if (world != except && world.getCapability(WorldUtilCapProvider.CAPABILITY)
-                    .map(cap -> cap.getTimeStopHandler().hasTimeStopInstances()).orElse(false)) {
-                return false;
-            }
-        }
-        
-        return true;
-    }
-    
-    
-    
     public int incWalkmanId() {
         return ++walkmanId;
     }
@@ -204,9 +146,6 @@ public class SaveFileUtilCap {
         }
         nbt.put("StandsTaken", timesStandsTakenMap);
         
-        nbt.putBoolean("GameruleDayLightCycle", gameruleDayLightCycle);
-        nbt.putBoolean("GameruleWeatherCycle", gameruleWeatherCycle);
-        nbt.putBoolean("UsedTimeStop", usedTimeStop);
         nbt.putInt("WalkmanId", walkmanId);
         nbt.putInt("CassetteId", cassetteId);
         nbt.put("PolaroidPhotos", polaroidPhotos.toNBT());
@@ -231,10 +170,6 @@ public class SaveFileUtilCap {
             timesStandsTaken = stands;
         }
         
-        usedTimeStop = nbt.getBoolean("UsedTimeStop");
-        refreshNextTick = usedTimeStop;
-        gameruleDayLightCycle = nbt.getBoolean("GameruleDayLightCycle");
-        gameruleWeatherCycle = nbt.getBoolean("GameruleWeatherCycle");
         walkmanId = nbt.getInt("WalkmanId");
         cassetteId = nbt.getInt("CassetteId");
         if (nbt.contains("PolaroidPhotos", Constants.NBT.TAG_COMPOUND)) polaroidPhotos.fromNBT(nbt.getCompound("PolaroidPhotos"));

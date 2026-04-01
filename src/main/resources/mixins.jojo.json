@@ -44,6 +44,10 @@
     "itemtracking.projectile.ArrowEntityMixin",
     "itemtracking.projectile.AbstractArrowEntityMixin",
     "itemtracking.projectile.PlayerPreferredProjectileMixin",
+    "timestop.EntitySeparateTickFlag",
+    "timestop.MobNoAIFlag",
+    "timestop.WorldStopDaylightAndWeatherServer",
+    "yapyapyap.EntityCancelTickAroundYapper",
 	"Matrix4fAccessor"
   ],
   "client": [
@@ -63,6 +67,9 @@
     "client.SMapDataPacketMixin",
     "client.MapItemRendererMixin",
     "client.LivingRendererInvoker",
-    "client.SpectatorGuiMixin"
+    "client.SpectatorGuiMixin",
+    "client.speechbubble.OpenScreenFix",
+    "client.speechbubble.SendAsSpeechBubble",
+    "timestop.WorldStopDaylightAndWeatherClient"
   ]
 }

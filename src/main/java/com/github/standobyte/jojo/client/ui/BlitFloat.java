@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.vector.Matrix4f;
 
 public class BlitFloat {
+    public static final int NO_TINT = 0xFFFFFFFF;
     
     public static void blitFloat(MatrixStack pMatrixStack, float pX, float pY, int pBlitOffset, 
             float pUOffset, float pVOffset, float pUWidth, float pVHeight, float pTextureWidth, float pTextureHeight) {

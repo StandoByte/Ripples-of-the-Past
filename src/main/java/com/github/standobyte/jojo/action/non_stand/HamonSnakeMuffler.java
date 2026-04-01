@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.subsystems.timestop.EntityTimeStop;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -20,7 +21,7 @@ import net.minecraft.util.DamageSource;
 public class HamonSnakeMuffler {
     
     public static boolean snakeMuffler(LivingEntity target, DamageSource dmgSource, float dmgAmount) {
-        if (!target.level.isClientSide() && target.canUpdate() && target.isOnGround()) {
+        if (!target.level.isClientSide() && EntityTimeStop.canUpdate(target) && target.isOnGround()) {
             Entity attacker = dmgSource.getEntity();
             if (attacker != null && dmgSource.getDirectEntity() == attacker && attacker instanceof LivingEntity
                     && target instanceof PlayerEntity && target.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.SATIPOROJA_SCARF.get()) {

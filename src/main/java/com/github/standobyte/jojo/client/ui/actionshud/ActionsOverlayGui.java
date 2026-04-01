@@ -115,7 +115,7 @@ public class ActionsOverlayGui extends AbstractGui {
     protected final ElementTransparency crosshairFillTransparency = new ElementTransparency(8, 6) {
         private static final int FADE_IN_TICKS = 2;
         @Override
-        float getValue(float partialTick) {
+        public float getValue(float partialTick) {
             if (ticksMax - ticks <= FADE_IN_TICKS) {
                 return (ticksMax - ticks + partialTick) / FADE_IN_TICKS;
             }

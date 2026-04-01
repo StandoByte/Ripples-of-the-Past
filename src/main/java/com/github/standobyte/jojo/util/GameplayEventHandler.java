@@ -92,6 +92,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.github.standobyte.jojo.subsystems.timestop.EntityTimeStop;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -678,8 +679,7 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void reduceDamageFromConfig(LivingHurtEvent event) {
         LivingEntity target = event.getEntityLiving();
-        if (!target.canUpdate() && target.getCapability(EntityUtilCapProvider.CAPABILITY)
-                .map(cap -> cap.wasStoppedInTime()).orElse(false)) {
+        if (!EntityTimeStop.canUpdate(target)) {
             event.setAmount(event.getAmount() * JojoModConfig.getCommonConfigInstance(false)
                     .timeStopDamageMultiplier.get().floatValue());
         }
@@ -888,7 +888,7 @@ public class GameplayEventHandler {
     public static void stackKnockbackInstead(LivingKnockBackEvent event) {
         LivingEntity target = event.getEntityLiving();
         
-        if (!target.canUpdate()) {
+        if (!EntityTimeStop.canUpdate(target)) {
             event.setCanceled(true);
             DamageUtil.applyKnockbackStack(target, event.getStrength(), event.getRatioX(), event.getRatioZ());
         }

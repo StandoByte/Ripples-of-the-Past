@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.IEntityGlowColor;
 import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentWorldData;
+import com.github.standobyte.jojo.subsystems.timestop.EntityTimeStop;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
@@ -32,12 +33,8 @@ import net.minecraft.util.math.vector.Vector3d;
 public class EntityUtilCap {
     private final Entity entity;
     private final MobEntity asMob;
-    private Boolean prevNoAi;
     
     private KnockbackCollisionImpact kbImpact;
-    
-    private boolean stoppedInTime = false;
-    private Queue<Runnable> runOnTimeResume = new LinkedList<>();
     
     private OptionalInt glowingColor = OptionalInt.empty();
     private int glowColorTicks = -1;
@@ -52,23 +49,11 @@ public class EntityUtilCap {
     
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        if (!entity.canUpdate() && wasStoppedInTime()) {
-            nbt.putBoolean("StoppedInTime", true);
-            if (prevNoAi != null) nbt.putBoolean("PrevNoAi", prevNoAi);
-        }
         nbt.put("KbImpact", kbImpact.serializeNBT());
         return nbt;
     }
     
     public void deserializeNBT(CompoundNBT nbt) {
-        stoppedInTime = nbt.getBoolean("StoppedInTime");
-        if (stoppedInTime) {
-            boolean isStoppedInTime = TimeStopHandler.isTimeStopped(entity.level, entity.blockPosition());
-            prevNoAi = MCUtil.getNbtElement(nbt, "PrevNoAi", ByteNBT.class).map(byteNbt -> byteNbt.getAsByte() != 0).orElse(null);
-            // updates the Entity#canUpdate field that Forge adds, since it is saved in NBT
-            updateEntityTimeStop(isStoppedInTime);
-        }
-        
         MCUtil.nbtGetCompoundOptional(nbt, "KbImpact").ifPresent(kbImpact::deserializeNBT);
     }
     
@@ -88,49 +73,22 @@ public class EntityUtilCap {
         
         tickMrPresidentOutOfBounds();
     }
-    
+
+    @Deprecated
     public void updateEntityTimeStop(boolean stopInTime) {
-        if (stopInTime) {
-            stoppedInTime = true;
-            entity.canUpdate(false);
-            
-            if (asMob != null && prevNoAi == null) {
-                prevNoAi = asMob.isNoAi();
-                asMob.setNoAi(true);
-            }
-        }
-        else if (stoppedInTime) {
-            entity.canUpdate(true);
-            
-            if (asMob != null) {
-                if (prevNoAi != null && !prevNoAi) {
-                    asMob.setNoAi(false);
-                }
-                prevNoAi = null;
-            }
-            
-            runOnTimeResume.forEach(Runnable::run);
-            runOnTimeResume.clear();
-        }
+        ((EntityTimeStop) entity).jojo_ripples$setStoppedInTime(stopInTime);
     }
-    
+
+    @Deprecated
     public boolean wasStoppedInTime() {
-        return stoppedInTime;
+        return ((EntityTimeStop) entity).jojo_ripples$isStoppedInTime();
     }
     
     
-    
+
+    @Deprecated
     public static void queueOnTimeResume(Entity entity, Runnable action) {
-        GeneralUtil.ifPresentOrElse(entity.getCapability(EntityUtilCapProvider.CAPABILITY).resolve(), 
-                cap -> {
-                    if (cap.stoppedInTime) {
-                        cap.runOnTimeResume.add(action);
-                    }
-                    else if (entity.canUpdate()) {
-                        action.run();
-                    }
-                }, 
-                action);
+        ((EntityTimeStop) entity).jojo_ripples$queueOnTimeResume(action);
     }
     
     

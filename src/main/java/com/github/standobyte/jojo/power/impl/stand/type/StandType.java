@@ -25,6 +25,7 @@ import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.command.configpack.StandStatsConfig;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
+import com.github.standobyte.jojo.mechanics.speechbubble.SpeechBubblesFunctionality;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -167,6 +168,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         public B addSummonShout(Supplier<SoundEvent> summonShoutSupplier) {
             if (summonShoutSupplier != null) {
                 getOptionals().summonShoutSupplier = summonShoutSupplier;
+                SpeechBubblesFunctionality._STAND_NAME_SUPPLIERS.add(summonShoutSupplier);
             }
             return getThis();
         }

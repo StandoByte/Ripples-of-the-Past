@@ -22,6 +22,7 @@ import com.github.standobyte.jojo.client.ui.BlitFloat;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.subsystems.timestop.EntityTimeStop;
 import com.github.standobyte.jojo.util.general.LazySupplier;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -145,7 +146,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         if (!itemCheck.isPositive()) {
             return itemCheck;
         }
-        if (!user.canUpdate() && !canBeUsedByStoppedInTime(user, power)) {
+        if (!EntityTimeStop.canUpdate(user) && !canBeUsedByStoppedInTime(user, power)) {
             return ActionConditionResult.NEGATIVE;
         }
         return checkSpecificConditions(user, power, target);

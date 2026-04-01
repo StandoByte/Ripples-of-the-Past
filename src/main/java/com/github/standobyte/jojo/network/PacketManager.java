@@ -6,6 +6,10 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.mechanics.speechbubble.ClSaySpeechBubblePacket;
+import com.github.standobyte.jojo.mechanics.speechbubble.SaySpeechBubblePacket;
+import com.github.standobyte.jojo.mechanics.speechbubble.clowning.ClSpeechChatStatePacket;
+import com.github.standobyte.jojo.mechanics.speechbubble.clowning.SpeechChatTypingPlayersPacket;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.network.packets.fromclient.ClAllGELifeformsButtonPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClAngeloRockButtonPacket;
@@ -166,8 +170,8 @@ import net.minecraftforge.fml.network.simple.SimpleChannel;
 // FIXME (!) in LAN, client logs get spammed with network exceptions (either the payload is an EmptyByteBuf or "Received invalid discriminator byte" error)
 public class PacketManager {
     private static final String PROTOCOL_VERSION = "1";
-    private static SimpleChannel serverChannel;
-    private static SimpleChannel clientChannel;
+    public static SimpleChannel serverChannel;
+    public static SimpleChannel clientChannel;
     private static int packetIndex = 0;
 
     public static void init() {
@@ -223,7 +227,9 @@ public class PacketManager {
         registerMessage(clientChannel, new ClPhotoRequestPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClRPSGameInputPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClRPSPickThoughtsPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        registerMessage(clientChannel, new ClAngeloRockButtonPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(clientChannel, new ClAngeloRockButtonPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(clientChannel, new ClSaySpeechBubblePacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(clientChannel, new ClSpeechChatStatePacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
 
         packetIndex = 0;
         registerMessage(serverChannel, new TrPlayerModSettingsPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -326,6 +332,8 @@ public class PacketManager {
         registerMessage(serverChannel, new RPSGameStatePacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new RPSOpponentPickThoughtsPacket.Handler(),        Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new PhotoForOtherPlayerPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new SaySpeechBubblePacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new SpeechChatTypingPlayersPacket.Handler(),        Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
     
     private static <MSG> void registerMessage(SimpleChannel channel, IModPacketHandler<MSG> handler, Optional<NetworkDirection> networkDirection) {
