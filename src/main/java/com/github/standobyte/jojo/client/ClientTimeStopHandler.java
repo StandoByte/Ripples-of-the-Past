@@ -26,8 +26,7 @@ public class ClientTimeStopHandler implements ITicking {
 
     private int timeStopTicks = 0;
     private int timeStopLength = 0;
-    
-    
+
     private ClientTimeStopHandler(Minecraft mc) {
         this.mc = mc;
     }
@@ -42,7 +41,6 @@ public class ClientTimeStopHandler implements ITicking {
     public static ClientTimeStopHandler getInstance() {
         return instance;
     }
-    
     
     private boolean isTimeStopped(BlockPos blockPos) {
         return isTimeStopped(new ChunkPos(blockPos));

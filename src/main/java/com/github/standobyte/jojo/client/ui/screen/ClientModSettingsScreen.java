@@ -218,7 +218,15 @@ public class ClientModSettingsScreen extends SettingsScreen {
                 @Override public void set(Boolean value) { settingsValues.timeStopAnimation = value; }
             };
             addButton(timeStopAnimation.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this, i));
-            
+
+            BooleanSetting timeStopWindEffect = new BooleanSetting(settings,
+                    new TranslationTextComponent("jojo.config.client.timeStopWindEffect"),
+                    new TranslationTextComponent("jojo.config.client.timeStopWindEffect.tooltip")
+            ) {
+                @Override public Boolean get() { return settingsValues.timeStopWindEffect; }
+                @Override public void set(Boolean value) { settingsValues.timeStopWindEffect = value; }
+            };
+            addButton(timeStopWindEffect.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this, i));
             
             Setting<HandSide> standSide = new EnumSetting<HandSide>(settings, 
                     new TranslationTextComponent("jojo.config.client.standSide"), 
