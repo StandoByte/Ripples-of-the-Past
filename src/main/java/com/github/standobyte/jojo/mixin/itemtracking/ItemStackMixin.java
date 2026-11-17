@@ -28,7 +28,7 @@ public abstract class ItemStackMixin extends CapabilityProvider<ItemStack> {
     @Shadow private Entity entityRepresentation;
     
     @Inject(method = "setEntityRepresentation", at = @At("HEAD"))
-    public void onSetEntityRepresentation(Entity entity, CallbackInfo ci) {
+    public void jojo_ripples$onSetEntityRepresentation(Entity entity, CallbackInfo ci) {
         if (entity != null) {
             boolean serverSide = entity != null && !entity.level.isClientSide() || entityRepresentation != null && !entityRepresentation.level.isClientSide();
             if (serverSide) {
@@ -42,7 +42,7 @@ public abstract class ItemStackMixin extends CapabilityProvider<ItemStack> {
     }
     
     @Inject(method = "copy", at = @At("TAIL"))
-    public void onCopy(CallbackInfoReturnable<ItemStack> ci) {
+    public void jojo_ripples$onCopy(CallbackInfoReturnable<ItemStack> ci) {
         ItemStack newItem = ci.getReturnValue();
         TrackerItemStack.getItemTracker(newItem).ifPresent(tracker -> {
             ItemStack oldItem = (ItemStack) (Object) this;
@@ -53,7 +53,7 @@ public abstract class ItemStackMixin extends CapabilityProvider<ItemStack> {
     }
     
     @Inject(method = "setTag", at = @At("TAIL"))
-    public void onSetTag(@Nullable CompoundNBT tag, CallbackInfo ci) {
+    public void jojo_ripples$onSetTag(@Nullable CompoundNBT tag, CallbackInfo ci) {
         if (TrackerItemStack.deserializesForgeCaps(tag)) {
             deserializeCaps(tag.getCompound("ForgeCaps"));
         }
