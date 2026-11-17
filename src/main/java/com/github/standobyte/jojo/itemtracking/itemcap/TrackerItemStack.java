@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.capability.entity.MerchantDataProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrackedItemPacket;
@@ -40,7 +41,9 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.village.GossipType;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 /**
  * Currently item stacks are being tracked in:
@@ -113,6 +116,9 @@ public class TrackerItemStack {
     }
     
     public static Optional<TrackerItemStack> getItemTracker(ItemStack itemStack, boolean allowEmpty) {
+        if (FMLEnvironment.dist == Dist.CLIENT && ClientUtil.getClientWorld() == null) {
+            return Optional.empty();
+        }
         if (!allowEmpty && itemStack.isEmpty()) {
             return Optional.empty();
         }
