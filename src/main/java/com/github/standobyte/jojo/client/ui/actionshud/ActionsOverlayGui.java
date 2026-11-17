@@ -129,11 +129,11 @@ public class ActionsOverlayGui extends AbstractGui {
     protected final Map<ControlScheme.Hotbar, FadeOut> actionHotbarFold = Arrays.stream(ControlScheme.Hotbar.values())
             .collect(Maps.toImmutableEnumMap(hotbar -> hotbar, hotbar -> new FadeOut(40, 10)));
     protected final Map<PowerClassification, ElementTransparency> customKeybindActionTransparency = Arrays.stream(PowerClassification.values())
-            .collect(Maps.toImmutableEnumMap(Function.identity(), __ -> new ElementTransparency(40, 10)));
+            .collect(Maps.toImmutableEnumMap(p -> p, __ -> new ElementTransparency(40, 10)));
     protected final Map<Exercise, ElementTransparency> exerciseBarsTransparency = Arrays.stream(Exercise.values())
-            .collect(Maps.toImmutableEnumMap(Function.identity(), __ -> new ElementTransparency(40, 10)));
+            .collect(Maps.toImmutableEnumMap(e -> e, __ -> new ElementTransparency(40, 10)));
     protected final Map<HamonStatIncNotif, ElementTransparency> hamonLvlIncreaseTransparency = Arrays.stream(HamonStatIncNotif.values())
-            .collect(Maps.toImmutableEnumMap(Function.identity(), __ -> new ElementTransparency(100, 20)));
+            .collect(Maps.toImmutableEnumMap(s -> s, __ -> new ElementTransparency(100, 20)));
     
     public static enum HamonStatIncNotif {
         STRENGTH,

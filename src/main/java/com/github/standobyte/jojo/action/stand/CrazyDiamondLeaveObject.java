@@ -64,7 +64,7 @@ import net.minecraftforge.event.entity.living.EntityTeleportEvent;
 
 public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
     
-    static final Map<Predicate<ItemStack>, TriConsumer<LivingEntity, ItemStack, LivingEntity>> ITEM_ACTION = Util.make(new HashMap<>(), map -> {
+    public static final Map<Predicate<ItemStack>, TriConsumer<LivingEntity, ItemStack, LivingEntity>> ITEM_ACTION = Util.make(new HashMap<>(), map -> {
         map.put(item -> item.getItem() == Items.CHORUS_FRUIT, (target, item, user) ->           chorusFruitTeleport(target, user));
         map.put(item -> item.getItem() == Items.ENDER_EYE, (target, item, user) ->              enderEyeFlight(target, item, user));
         map.put(item -> item.getItem() == Items.FIREWORK_ROCKET, (target, item, user) ->        fireworkFlight(target, item, user));
@@ -87,7 +87,7 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
         map.put(item -> item.isEdible(), (target, item, user) ->                                target.eat(target.level, item.copy()));
         map.put(item -> item.getItem() == Items.ENCHANTED_GOLDEN_APPLE, (target, item, user) -> VampirismUtil.onEnchantedGoldenAppleEaten(target));
     });
-    static final Map<Predicate<ItemStack>, TriPredicate<LivingEntity, ItemStack, LivingEntity>> ITEM_ACTION_CONDITIONAL = Util.make(new HashMap<>(), map -> {
+    public static final Map<Predicate<ItemStack>, TriPredicate<LivingEntity, ItemStack, LivingEntity>> ITEM_ACTION_CONDITIONAL = Util.make(new HashMap<>(), map -> {
         map.put(item -> item.getItem() instanceof StandArrowItem, (target, item, user) ->       StandArrowItem.onPiercedByArrow(target, item, target.level, Optional.of(user)));
     });
 
