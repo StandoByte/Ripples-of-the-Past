@@ -695,6 +695,8 @@
   "jojo.config.client.menacingParticles.tooltip": "Частицы ゴゴゴゴゴ, исходящие от неактивных игроков",
   "jojo.config.client.timeStopAnimation": "Анимация остановки времени",
   "jojo.config.client.timeStopAnimation.tooltip": "Включает визуальный эффект остановки времени, если его продолжительность - 5 секунд или больше.",
+  "jojo.config.client.timeStopWindEffect": "Эффект ветра в остановке времени",
+  "jojo.config.client.timeStopWindEffect.tooltip": "Включает визуальный эффект в режиме остановки времени. Похож на небольшие линии, напоминающие ветер...",
   "jojo.config.client.standSide": "Расположение Стенда",
   "jojo.config.client.standSide.tooltip": "С какой стороны от игрока будет находиться ваш Стенд.",
   "jojo.config.client.option.stand_left": "Слева",
